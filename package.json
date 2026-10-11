@@ -1,8 +1,8 @@
 {
   "name": "acsl-toolkit",
   "displayName": "ACSL Toolkit",
-  "description": "ACSL syntax highlighting, annotation-aware completion, and snippets inside C and C++ documents.",
-  "version": "0.1.0",
+  "description": "ACSL syntax highlighting, VS Code line-comment support, context-aware completion, and snippets inside C and C++ documents.",
+  "version": "0.1.1",
   "publisher": "zehanchen",
   "repository": {
     "type": "git",
@@ -82,7 +82,8 @@
         },
         "tokenTypes": {
           "meta.embedded.block.acsl": "other",
-          "meta.embedded.inline.acsl": "other"
+          "meta.embedded.inline.acsl": "other",
+          "comment.line.double-slash.acsl": "comment"
         }
       }
     ]

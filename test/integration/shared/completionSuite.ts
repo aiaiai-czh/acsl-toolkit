@@ -125,7 +125,7 @@ export function registerCompletionIntegrationSuite(): void {
   suite('ACSL completion integration', () => {
     suiteSetup(async () => {
       const extension = vscode.extensions.getExtension(
-        'acsl-toolkit.acsl-toolkit',
+        'zehanchen.acsl-toolkit',
       );
       if (extension === undefined) {
         fail('The ACSL Toolkit development extension is not installed');
@@ -338,6 +338,54 @@ export function registerCompletionIntegrationSuite(): void {
         'requires',
         'Completion range must consume the suffix after the cursor',
       );
+    });
+
+    test('uses the native line-comment action inside a block annotation', async () => {
+      const activeSource = '/*@\n  req\n*/';
+      const document = await vscode.workspace.openTextDocument({
+        language: 'c',
+        content: activeSource,
+      });
+      const editor = await vscode.window.showTextDocument(document, {
+        preview: false,
+      });
+
+      const placeCursorAfterPrefix = (): void => {
+        const position = positionAfter(document, 'req');
+        editor.selection = new vscode.Selection(position, position);
+      };
+
+      placeCursorAfterPrefix();
+      await vscode.commands.executeCommand('editor.action.commentLine');
+      assertEqual(
+        /^\/\/ ?req$/u.test(document.lineAt(1).text.trim()),
+        true,
+        'The clause line must be commented',
+      );
+
+      const disabledItems = await requestCompletions(
+        document,
+        positionAfter(document, 'req'),
+      );
+      assertEqual(
+        disabledItems.filter(isAcslCompletion).length,
+        0,
+        'Disabled annotation must not receive ACSL completion',
+      );
+
+      placeCursorAfterPrefix();
+      await vscode.commands.executeCommand('editor.action.commentLine');
+      assertEqual(
+        document.getText(),
+        activeSource,
+        'Running the native action again must restore the clause',
+      );
+
+      const restoredItems = await requestCompletions(
+        document,
+        positionAfter(document, 'req'),
+      );
+      assertHasLabel(restoredItems, 'requires');
     });
   });
 }

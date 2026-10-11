@@ -77,6 +77,8 @@ describe('scanAcslContext', () => {
   it.each([
     '// req|',
     '/* req| */',
+    '// @ req|',
+    '/* @ req| */',
     'int req|;',
   ])('does not trigger in ordinary source: %s', (source) => {
     expect(contextAt(source)).toBeUndefined();
@@ -170,6 +172,96 @@ describe('scanAcslContext', () => {
   it('is not active inside an opening marker', () => {
     expect(contextAt('/*|@ req */')).toBeUndefined();
     expect(contextAt('//@'.replace('@', '|@'))).toBeUndefined();
+  });
+
+  it('does not trigger inside an ACSL line comment in a block annotation', () => {
+    expect(contextAt('/*@\n  // requires req|\n*/')).toBeUndefined();
+  });
+
+  it('resumes the block annotation after an ACSL line comment', () => {
+    expect(contextAt('/*@\n  // requires old_value;\n  req|\n*/')).toMatchObject({
+      kind: 'block',
+      annotationStart: 0,
+      contentStart: 3,
+    });
+  });
+
+  it('ends an ACSL line comment at CRLF', () => {
+    expect(contextAt('/*@\r\n  // disabled\r\n  req|\r\n*/')).toMatchObject({
+      kind: 'block',
+    });
+  });
+
+  it('does not trigger after a second // in a line annotation', () => {
+    expect(contextAt('//@ assert x > 0; // req|')).toBeUndefined();
+  });
+
+  it('does not mistake // inside an ACSL string for a line comment', () => {
+    expect(contextAt('/*@ requires text == "//"; req| */')).toMatchObject({
+      kind: 'block',
+    });
+  });
+
+  it('does not mistake // inside a line-annotation string for a comment', () => {
+    expect(contextAt('//@ requires text == "//"; req|')).toMatchObject({
+      kind: 'line',
+    });
+  });
+
+  it('handles escaped quotes before // inside an ACSL string', () => {
+    expect(
+      contextAt(String.raw`/*@ requires text == "\"//"; req| */`),
+    ).toMatchObject({ kind: 'block' });
+  });
+
+  it.each([
+    "/*@ requires character == '/'; req| */",
+    "//@ requires character == '/'; req|",
+  ])('resumes ACSL context after a character literal: %s', (source) => {
+    expect(contextAt(source)).toBeDefined();
+  });
+
+  it('does not trigger completion inside an ACSL string', () => {
+    expect(contextAt('/*@ requires text == "// req|"; */')).toBeUndefined();
+  });
+
+  it('recovers from an unfinished ACSL string at the next block line', () => {
+    expect(contextAt('/*@ requires text == "unfinished\n  req|\n*/')).toMatchObject({
+      kind: 'block',
+    });
+  });
+
+  it('ends a line annotation when an ACSL string reaches a newline', () => {
+    expect(
+      contextAt('//@ requires text == "unfinished\nint req|;'),
+    ).toBeUndefined();
+  });
+
+  it('recovers from an escaped newline in a block ACSL string', () => {
+    expect(
+      contextAt('/*@ requires text == "unfinished\\\n  req|\n*/'),
+    ).toMatchObject({ kind: 'block' });
+  });
+
+  it('ends a line annotation at an escaped CRLF in an ACSL string', () => {
+    expect(
+      contextAt('//@ requires text == "unfinished\\\r\nint req|;'),
+    ).toBeUndefined();
+  });
+
+  it('ends an inner line comment together with its line annotation', () => {
+    expect(contextAt('//@ assert value; // disabled\nint req|;')).toBeUndefined();
+  });
+
+  it('lets the block terminator close an ACSL line comment', () => {
+    expect(contextAt('/*@ // disabled */ int req|;')).toBeUndefined();
+  });
+
+  it.each([
+    '/*@ requires "unfinished */ int req|;',
+    "/*@ requires 'unfinished */ int req|;",
+  ])('lets the block terminator close an unfinished ACSL literal: %s', (source) => {
+    expect(contextAt(source)).toBeUndefined();
   });
 
   it('is active before a block terminator but not after it', () => {

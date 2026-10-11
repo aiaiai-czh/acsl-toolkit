@@ -48,6 +48,9 @@ the exact VSIX proposed for release.
 - [ ] A multi-line block highlights until `*/`.
 - [ ] An unfinished block highlights through EOF.
 - [ ] `//@ assert x > 0;` highlights only to line end.
+- [ ] A `// requires x > 0;` clause inside `/*@ ... */` uses the same comment
+      styling as an ordinary line comment; `requires` is not highlighted as an
+      ACSL keyword.
 - [ ] A marker inside an ordinary string, raw string, character literal, or
       ordinary comment does not begin an annotation.
 - [ ] Keywords, logic types, built-ins, operators, and punctuation remain
@@ -94,6 +97,19 @@ the exact VSIX proposed for release.
 - [ ] Multiple annotations in one file use the annotation containing the cursor.
 - [ ] Escaped quotes and C++ raw-string custom delimiters do not confuse context
       detection.
+- [ ] Inside `/*@ ... */`, VS Code's **Toggle Line Comment** (`Ctrl+/` on
+      Windows/Linux, `Cmd+/` on macOS) inserts `//` on the selected clause
+      line or lines without changing the outer annotation delimiters.
+- [ ] A clause commented with `//` uses ordinary comment colors and receives no
+      ACSL completion in Dark+, Light+, and the selected third-party theme.
+- [ ] Running **Toggle Line Comment** again restores the clause and ACSL
+      highlighting/completion.
+- [ ] Multi-line and multi-cursor line-comment edits can be reverted normally
+      with Undo.
+- [ ] The extension does not offer nested `/* ... */` comments inside a block
+      annotation, and `*/` still closes the outer annotation.
+- [ ] VS Code's normal C/C++ **Toggle Line Comment** behavior remains unchanged
+      outside ACSL annotations.
 - [ ] A representative 1 MiB source file has no perceptible suggestion delay.
 
 ## Host and platform coverage

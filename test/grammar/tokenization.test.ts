@@ -6,6 +6,7 @@ import {
   INITIAL,
   Registry,
   type IGrammar,
+  type IGrammarConfiguration,
   type IRawGrammar,
   type StateStack,
 } from 'vscode-textmate';
@@ -23,6 +24,58 @@ const acslGrammar = loadRawGrammar('../../syntaxes/acsl.tmLanguage.json');
 const injectionGrammar = loadRawGrammar(
   '../../syntaxes/acsl-injection.tmLanguage.json',
 );
+
+interface GrammarContribution {
+  readonly scopeName: string;
+  readonly embeddedLanguages?: Readonly<Record<string, string>>;
+  readonly tokenTypes?: Readonly<Record<string, 'other' | 'comment' | 'string'>>;
+}
+
+interface ExtensionManifest {
+  readonly contributes: {
+    readonly grammars: readonly GrammarContribution[];
+  };
+}
+
+const extensionManifest = JSON.parse(
+  readFileSync(new URL('../../package.json', import.meta.url), 'utf8'),
+) as ExtensionManifest;
+const injectionContribution = (() => {
+  const contribution = extensionManifest.contributes.grammars.find(
+    ({ scopeName }) => scopeName === 'acsl.injection',
+  );
+  if (contribution === undefined) {
+    throw new Error('Missing acsl.injection grammar contribution');
+  }
+  return contribution;
+})();
+
+const ACSL_LANGUAGE_ID = 2;
+const TOKEN_TYPE_IDS = {
+  other: 0,
+  comment: 1,
+  string: 2,
+} as const;
+
+function manifestGrammarConfiguration(): IGrammarConfiguration {
+  return {
+    embeddedLanguages: Object.fromEntries(
+      Object.entries(injectionContribution.embeddedLanguages ?? {}).map(
+        ([scope, language]) => {
+          if (language !== 'acsl') {
+            throw new Error(`Unexpected embedded language ${language}`);
+          }
+          return [scope, ACSL_LANGUAGE_ID];
+        },
+      ),
+    ) as IGrammarConfiguration['embeddedLanguages'],
+    tokenTypes: Object.fromEntries(
+      Object.entries(injectionContribution.tokenTypes ?? {}).map(
+        ([scope, tokenType]) => [scope, TOKEN_TYPE_IDS[tokenType]],
+      ),
+    ) as IGrammarConfiguration['tokenTypes'],
+  };
+}
 
 const hostGrammar: IRawGrammar = {
   scopeName: 'source.c',
@@ -43,6 +96,7 @@ const hostGrammar: IRawGrammar = {
 };
 
 let grammar: IGrammar;
+let configuredGrammar: IGrammar;
 
 beforeAll(async () => {
   const wasm = readFileSync(
@@ -67,6 +121,30 @@ beforeAll(async () => {
   await registry.addGrammar(acslGrammar);
   await registry.addGrammar(injectionGrammar);
   grammar = await registry.addGrammar(hostGrammar, ['acsl.injection']);
+
+  const configuredGrammars = new Map<string, IRawGrammar>([
+    ['source.c', hostGrammar],
+    ['source.acsl', acslGrammar],
+    ['acsl.injection', injectionGrammar],
+  ]);
+  const configuredRegistry = new Registry({
+    onigLib: Promise.resolve({
+      createOnigScanner: (sources) => new OnigScanner(sources),
+      createOnigString: (text) => new OnigString(text),
+    }),
+    loadGrammar: async (scopeName) => configuredGrammars.get(scopeName),
+    getInjections: (scopeName) =>
+      scopeName === 'source.c' ? ['acsl.injection'] : [],
+  });
+  const loadedGrammar = await configuredRegistry.loadGrammarWithConfiguration(
+    'source.c',
+    1,
+    manifestGrammarConfiguration(),
+  );
+  if (loadedGrammar === null) {
+    throw new Error('Could not load configured C grammar');
+  }
+  configuredGrammar = loadedGrammar;
 });
 
 interface TokenizedLine {
@@ -95,6 +173,30 @@ function tokenize(line: string, ruleStack: StateStack = INITIAL): TokenizedLine 
       return token.scopes;
     },
   };
+}
+
+function metadataAt(
+  line: string,
+  tokens: Uint32Array,
+  needle: string,
+): { readonly languageId: number; readonly tokenType: number } {
+  const offset = line.indexOf(needle);
+  if (offset === -1) throw new Error(`Missing token ${needle} in ${line}`);
+
+  for (let index = 0; index < tokens.length; index += 2) {
+    const startOffset = tokens[index]!;
+    const endOffset =
+      index + 2 < tokens.length ? tokens[index + 2]! : line.length;
+    if (startOffset <= offset && offset < endOffset) {
+      const metadata = tokens[index + 1]!;
+      return {
+        languageId: metadata & 0xff,
+        tokenType: (metadata & 0x300) >>> 8,
+      };
+    }
+  }
+
+  throw new Error(`No binary token metadata at offset ${offset}`);
 }
 
 function tokenizeFixture(relativeUrl: string): readonly TokenizedLine[] {
@@ -198,6 +300,99 @@ describe('TextMate injection tokenization', () => {
     expect(comment.scopesAt('requires')).not.toContain('keyword.control.acsl');
     expect(comment.scopesAt('ensures')).not.toContain('keyword.control.acsl');
     expect(string.scopesAt('requires')).not.toContain('keyword.control.acsl');
+  });
+
+  it('scopes // content inside a block annotation as an ordinary comment', () => {
+    const opening = tokenize('/*@');
+    const commented = tokenize('  // requires old_value;', opening.ruleStack);
+    const following = tokenize('  ensures new_value;', commented.ruleStack);
+
+    expect(commented.scopesAt('//')).toContain(
+      'comment.line.double-slash.acsl',
+    );
+    expect(commented.scopesAt('requires')).toContain(
+      'comment.line.double-slash.acsl',
+    );
+    expect(commented.scopesAt('requires')).not.toContain(
+      'keyword.control.acsl',
+    );
+    expect(following.scopesAt('ensures')).toContain('keyword.control.acsl');
+  });
+
+  it('ends an inner comment together with its line annotation', () => {
+    const annotation = tokenize('//@ assert value; // disabled');
+    const following = tokenize(
+      'int requires = 0;',
+      annotation.ruleStack,
+    );
+
+    expect(annotation.scopesAt('disabled')).toContain(
+      'comment.line.double-slash.acsl',
+    );
+    expect(following.scopesAt('requires')).not.toContain(
+      'keyword.control.acsl',
+    );
+    expect(following.scopesAt('int')).not.toContain(
+      'meta.embedded.inline.acsl',
+    );
+  });
+
+  it('keeps embedded ACSL as code but classifies inner // content as comments', () => {
+    const opening = configuredGrammar.tokenizeLine2('/*@', INITIAL);
+    const codeLine = '  requires active_value;';
+    const commentLine = '  // requires old_value;';
+    const code = configuredGrammar.tokenizeLine2(
+      codeLine,
+      opening.ruleStack,
+    );
+    const comment = configuredGrammar.tokenizeLine2(
+      commentLine,
+      opening.ruleStack,
+    );
+
+    expect(metadataAt(codeLine, code.tokens, 'requires')).toEqual({
+      languageId: ACSL_LANGUAGE_ID,
+      tokenType: TOKEN_TYPE_IDS.other,
+    });
+    expect(metadataAt(commentLine, comment.tokens, 'requires')).toEqual({
+      languageId: ACSL_LANGUAGE_ID,
+      tokenType: TOKEN_TYPE_IDS.comment,
+    });
+  });
+
+  it('lets the outer terminator close an ACSL line comment', () => {
+    const opening = tokenize('/*@');
+    const closing = tokenize(
+      '  // disabled */ int requires = 0;',
+      opening.ruleStack,
+    );
+
+    expect(closing.scopesAt('disabled')).toContain(
+      'comment.line.double-slash.acsl',
+    );
+    expect(closing.scopesAt('*/')).toContain('comment.block.acsl');
+    expect(closing.scopesAt('requires')).not.toContain(
+      'keyword.control.acsl',
+    );
+    expect(closing.scopesAt('int')).not.toContain(
+      'meta.embedded.block.acsl',
+    );
+  });
+
+  it('treats spaced marker lookalikes as ordinary C comments', () => {
+    const block = tokenize('/* @ requires x; */');
+    const line = tokenize('// @ assert x;');
+
+    expect(block.scopesAt('requires')).toContain('comment.block.c');
+    expect(block.scopesAt('requires')).not.toContain(
+      'meta.embedded.block.acsl',
+    );
+    expect(block.scopesAt('requires')).not.toContain('keyword.control.acsl');
+    expect(line.scopesAt('assert')).toContain('comment.line.double-slash.c');
+    expect(line.scopesAt('assert')).not.toContain(
+      'meta.embedded.inline.acsl',
+    );
+    expect(line.scopesAt('assert')).not.toContain('keyword.control.acsl');
   });
 
   it.each([

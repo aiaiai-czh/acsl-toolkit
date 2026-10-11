@@ -65,6 +65,7 @@ export function buildGrammar(entries) {
     name: 'ACSL',
     scopeName: 'source.acsl',
     patterns: [
+      { include: '#comments' },
       { include: '#strings' },
       { include: '#annotation-decoration' },
       { include: '#multiword' },
@@ -81,6 +82,20 @@ export function buildGrammar(entries) {
       { include: '#punctuation' },
     ],
     repository: {
+      comments: {
+        patterns: [
+          {
+            name: 'comment.line.double-slash.acsl',
+            begin: '//',
+            beginCaptures: {
+              0: { name: 'punctuation.definition.comment.acsl' },
+            },
+            // ACSL line comments end at EOL. Within a block annotation the
+            // parent C comment terminator must still be able to close first.
+            end: '(?=\\*/)|(?=$)',
+          },
+        ],
+      },
       strings: {
         patterns: [
           {

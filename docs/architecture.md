@@ -7,12 +7,14 @@ existing C and C++ language services. The extension recognizes annotation
 boundaries, offers lexical data, and colors ACSL tokens. It does not build a C
 or ACSL syntax tree and does not execute verification tools.
 
-The design has four independent layers:
+The design has three independent layers:
 
 ```text
 C/C++ TextDocument (languageId: c or cpp)
 ├── TextMate engine
 │   └── ACSL injection grammar
+├── Embedded ACSL language configuration
+│   └── `//` line-comment token
 └── Web Extension Host
     └── Completion provider
         ├── C/C++ lexical context scanner
@@ -30,9 +32,9 @@ boundaries so reviews can detect behavioral drift.
 
 `src/extension.ts` registers one completion provider for the `c` and `cpp`
 language ids with `\` as its only trigger character. It does not register file
-extensions, change language associations, launch a child process, read a
-workspace, or write files. The manifest exposes only a `browser` entry point,
-so the same bundle runs in desktop and browser extension hosts.
+extensions, change language associations, launch a child process, or read a
+workspace. The manifest exposes only a `browser` entry point, so the same bundle
+runs in desktop and browser extension hosts.
 
 The internal `acsl` language id exists solely for embedded-language token
 classification. It has no filename association and therefore cannot take
@@ -53,7 +55,23 @@ choose colors. No theme is bundled and no colors are hard-coded.
 
 The embedded scopes are classified as token type `other`, not `comment`. This
 allows normal word suggestions inside ACSL without changing the user's global
-`editor.quickSuggestions.comments` setting.
+`editor.quickSuggestions.comments` setting. A more specific mapping assigns an
+inner `//` region both a standard line-comment scope and the `comment` token
+type, so its highlighting and editor behavior match an ordinary comment.
+
+## Embedded line comments
+
+The embedded `acsl` language configuration declares `//` as its line-comment
+token. When the cursor or selection is inside a block annotation, VS Code's
+built-in **Toggle Line Comment** action therefore inserts or removes `//`; the
+extension does not register a custom editing command or keybinding. The ACSL
+grammar recognizes the inserted text as a line comment, and the completion
+scanner excludes it from ACSL context until the physical line ends.
+
+Only line comments are declared. Nested `/* ... */` comments are intentionally
+unsupported because the surrounding annotation is already a C/C++ block
+comment and C/C++ block comments do not nest. The outer `*/` delimiter always
+retains control of the annotation boundary.
 
 ## Context detection
 
@@ -68,14 +86,20 @@ code
 ├── char
 ├── rawString
 ├── acslLine
-└── acslBlock
+├── acslBlock
+├── acslInnerLineComment
+├── acslString
+└── acslChar
 ```
 
 Only markers encountered in `code` can enter an ACSL state. Escape sequences,
 line continuations, and C++ raw-string delimiters are handled so marker-like
 text inside literals cannot enable completion. A block annotation that has not
 yet been closed remains valid through the cursor, which is essential during
-editing. Ordinary C/C++ block comments are not nested.
+editing. Inside an annotation, `//` enters `acslInnerLineComment`; completion is
+disabled there and resumes on the next line. ACSL string and character states
+prevent `//` contained in a literal from being treated as a comment. Ordinary
+C/C++ block comments are not nested.
 
 The scanner returns the annotation kind and offsets of the marker, content, and
 cursor. If it returns no context, the provider returns `undefined` immediately.
@@ -127,8 +151,9 @@ two validated profiles exist.
 
 The extension has no workspace-dependent behavior and is safe in untrusted and
 virtual workspaces. It processes the active document text supplied by VS Code
-but does not enumerate, open, or write other workspace files. It uses only
-browser-compatible VS Code APIs and bundled data. There are no Node built-ins,
-native modules, external processes, telemetry, network requests, or
-platform-dependent code at runtime.
+but does not enumerate or open other workspace files. Clause commenting is
+performed by VS Code's built-in editor action and remains normally undoable. The
+extension uses only browser-compatible VS Code APIs and bundled data. There are
+no Node built-ins, native modules, external processes, telemetry, network
+requests, or platform-dependent code at runtime.
 

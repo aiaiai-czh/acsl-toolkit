@@ -6,7 +6,10 @@ workspace in `fixtures/workspace` and verify that:
 
 - C and C++ documents keep their existing language IDs;
 - ACSL completion is available inside block and line annotations;
-- ordinary code and ordinary comments do not receive ACSL candidates; and
+- ordinary code and ordinary comments do not receive ACSL candidates;
+- VS Code's built-in line-comment action inserts `//` inside a block annotation,
+  suppresses ACSL completion on that clause, and restores it when toggled again;
+  and
 - an `untitled:` document works, proving that the provider is not restricted to
   the `file:` URI scheme.
 

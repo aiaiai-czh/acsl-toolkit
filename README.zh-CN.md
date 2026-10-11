@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-ACSL Toolkit 是一个轻量级的 ANSI/ISO C Specification Language（ACSL）编辑辅助扩展。它在现有 C/C++ 文档中提供语法高亮、仅限 annotation 的词法补全和实用模板，不要求安装 Frama-C、OCaml、语言服务器或原生可执行程序。
+ACSL Toolkit 是一个轻量级的 ANSI/ISO C Specification Language（ACSL）编辑辅助扩展。它在现有 C/C++ 文档中提供语法高亮、原生行注释支持、仅限 annotation 的词法补全和实用模板，不要求安装 Frama-C、OCaml、语言服务器或原生可执行程序。
 
 扩展只增强已有的 `c` 和 `cpp` language mode，不会接管 C/C++ 文件，也不会替代 C/C++ 语言扩展。
 
@@ -28,14 +28,14 @@ int inspect(const int *buffer, int length);
 - 为 `requires`、`ensures`、`loop invariant` 等 clause 插入可用 Tab 跳转的模板，但不会猜测 predicate 内容。
 - 为 `axiomatic`、`predicate`、`logic`、`lemma`、`axiom`、`behavior` 和 `inductive` 等声明提供结构化模板。
 - 块 annotation 使用多行声明模板；在 `//@` 中自动使用不会逸出当前行的单行形式。
+- 支持在块 annotation 内使用 VS Code 原生的 **切换行注释** 操作注释规约条款。
 - 不修改文档已有的 `c` 或 `cpp` language ID，使其他 C/C++ 高亮、补全、导航和格式化 provider 可以继续工作。
 
 ## 安装
 
 ### Visual Studio Marketplace
 
-正式发布后，在 VS Code 的扩展视图中搜索 **ACSL Toolkit**，然后选择
-**Install**。
+在 VS Code 的扩展视图中搜索 **ACSL Toolkit**，然后选择 **Install**。
 
 ### 安装 VSIX
 
@@ -75,6 +75,25 @@ const char *text = "/*@ not an annotation */";
 int requires = 1;
 ```
 
+### 注释 ACSL 规约条款
+
+在 `/*@ ... */` annotation 内，将光标放在规约条款所在行，或者选中多行
+规约条款，然后执行 VS Code 内置的 **切换行注释**（Windows/Linux 默认为
+`Ctrl+/`，macOS 默认为 `Cmd+/`）。VS Code 会插入 `//`，并保留外层 ACSL
+annotation：
+
+```c
+/*@
+  // requires old_condition;
+  ensures new_condition;
+*/
+```
+
+被注释的规约条款使用普通 comment scope，由当前主题按普通注释着色，并且不再
+提供 ACSL 补全。再次执行 **切换行注释** 即可恢复。ACSL Toolkit 在 annotation
+内部只提供 `//` 行注释；由于 C/C++ 的块注释不能嵌套，因此不支持在
+`/*@ ... */` 内插入嵌套的 `/* ... */` 注释。
+
 ## 模板
 
 带模板的词汇只显示一个候选，不会同时出现重复的 keyword 和 snippet。接受 `requires` 后会插入 predicate 占位符：
@@ -112,7 +131,7 @@ ACSL Toolkit 不提供 ACSL parser、AST、语义类型推导、diagnostics、pr
 
 ## 隐私与工作区安全
 
-扩展不收集遥测、不发起网络请求、不启动外部进程，不会自行枚举或打开其他工作区文件，也不会写入工作区。补全只在本地内存中处理 VS Code 提供的当前文档文本。扩展支持不受信任工作区和虚拟工作区，不请求额外的工作区信任。
+扩展不收集遥测、不发起网络请求、不启动外部进程，也不会自行枚举或打开其他工作区文件。补全只在本地内存中处理 VS Code 提供的当前文档文本。规约条款注释由 VS Code 内置编辑操作完成，并支持正常撤销。扩展支持不受信任工作区和虚拟工作区，不请求额外的工作区信任。
 
 ## 支持与开发
 

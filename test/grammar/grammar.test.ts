@@ -21,12 +21,25 @@ interface Grammar {
   repository?: Record<string, { patterns: GrammarPattern[] }>;
 }
 
+interface LanguageConfiguration {
+  comments?: {
+    lineComment?: string;
+    blockComment?: readonly [string, string];
+  };
+}
+
 function loadGrammar(relativeUrl: string): Grammar {
   return JSON.parse(readFileSync(new URL(relativeUrl, import.meta.url), 'utf8')) as Grammar;
 }
 
 const coreGrammar = loadGrammar('../../syntaxes/acsl.tmLanguage.json');
 const injectionGrammar = loadGrammar('../../syntaxes/acsl-injection.tmLanguage.json');
+const languageConfiguration = JSON.parse(
+  readFileSync(
+    new URL('../../syntaxes/acsl-language-configuration.json', import.meta.url),
+    'utf8',
+  ),
+) as LanguageConfiguration;
 
 function repositoryPatterns(name: string): GrammarPattern[] {
   const patterns = coreGrammar.repository?.[name]?.patterns;
@@ -63,8 +76,22 @@ function repositoryForCategory(category: (typeof ACSL_CATALOG)[number]['category
 describe('generated ACSL grammar', () => {
   it('uses a dedicated embedded-language scope', () => {
     expect(coreGrammar.scopeName).toBe('source.acsl');
+    expect(coreGrammar.patterns.map(({ include }) => include)).toContain('#comments');
     expect(coreGrammar.patterns.map(({ include }) => include)).toContain('#clauses');
     expect(coreGrammar.patterns.map(({ include }) => include)).toContain('#builtin-functions');
+  });
+
+  it('uses line comments without contributing unsafe nested block comments', () => {
+    expect(languageConfiguration.comments?.lineComment).toBe('//');
+    expect(languageConfiguration.comments?.blockComment).toBeUndefined();
+
+    const comments = repositoryPatterns('comments');
+    expect(comments).toHaveLength(1);
+    expect(comments[0]).toMatchObject({
+      name: 'comment.line.double-slash.acsl',
+      begin: '//',
+      end: '(?=\\*/)|(?=$)',
+    });
   });
 
   it('represents every catalog label in its category repository', () => {

@@ -12,7 +12,10 @@ export type CLexicalState =
   | 'char'
   | 'rawString'
   | 'acslLine'
-  | 'acslBlock';
+  | 'acslBlock'
+  | 'acslInnerLineComment'
+  | 'acslString'
+  | 'acslChar';
 
 export interface CLexicalScanResult {
   readonly state: CLexicalState;
@@ -115,6 +118,7 @@ export function scanCSourceAtOffset(
   let annotationStart: number | undefined;
   let contentStart: number | undefined;
   let rawStringTerminator = '';
+  let acslContainer: 'acslBlock' | 'acslLine' | undefined;
 
   while (offset < cursorOffset) {
     switch (state) {
@@ -135,7 +139,8 @@ export function scanCSourceAtOffset(
               break;
             }
 
-            state = startsBlockComment ? 'acslBlock' : 'acslLine';
+            acslContainer = startsBlockComment ? 'acslBlock' : 'acslLine';
+            state = acslContainer;
             annotationStart = offset;
             contentStart = offset + 3;
             offset += 3;
@@ -241,9 +246,19 @@ export function scanCSourceAtOffset(
       case 'acslLine':
         if (isLineBreak(text[offset])) {
           state = 'code';
+          acslContainer = undefined;
           annotationStart = undefined;
           contentStart = undefined;
           offset = consumeLineBreak(text, offset);
+        } else if (text[offset] === '/' && text[offset + 1] === '/') {
+          state = 'acslInnerLineComment';
+          offset += 2;
+        } else if (text[offset] === '"') {
+          state = 'acslString';
+          offset += 1;
+        } else if (text[offset] === "'") {
+          state = 'acslChar';
+          offset += 1;
         } else {
           offset += 1;
         }
@@ -252,13 +267,97 @@ export function scanCSourceAtOffset(
       case 'acslBlock':
         if (text[offset] === '*' && text[offset + 1] === '/') {
           state = 'code';
+          acslContainer = undefined;
           annotationStart = undefined;
           contentStart = undefined;
           offset += 2;
+        } else if (text[offset] === '/' && text[offset + 1] === '/') {
+          state = 'acslInnerLineComment';
+          offset += 2;
+        } else if (text[offset] === '"') {
+          state = 'acslString';
+          offset += 1;
+        } else if (text[offset] === "'") {
+          state = 'acslChar';
+          offset += 1;
         } else {
           offset += 1;
         }
         break;
+
+      case 'acslInnerLineComment':
+        if (
+          acslContainer === 'acslBlock' &&
+          text[offset] === '*' &&
+          text[offset + 1] === '/'
+        ) {
+          state = 'code';
+          acslContainer = undefined;
+          annotationStart = undefined;
+          contentStart = undefined;
+          offset += 2;
+        } else if (isLineBreak(text[offset])) {
+          if (acslContainer === 'acslBlock') {
+            state = 'acslBlock';
+          } else {
+            state = 'code';
+            acslContainer = undefined;
+            annotationStart = undefined;
+            contentStart = undefined;
+          }
+          offset = consumeLineBreak(text, offset);
+        } else {
+          offset += 1;
+        }
+        break;
+
+      case 'acslString':
+      case 'acslChar': {
+        const quote = state === 'acslString' ? '"' : "'";
+
+        if (
+          acslContainer === 'acslBlock' &&
+          text[offset] === '*' &&
+          text[offset + 1] === '/'
+        ) {
+          state = 'code';
+          acslContainer = undefined;
+          annotationStart = undefined;
+          contentStart = undefined;
+          offset += 2;
+        } else if (text[offset] === '\\') {
+          const escapedOffset = offset + 1;
+          if (isLineBreak(text[escapedOffset])) {
+            if (acslContainer === 'acslBlock') {
+              state = 'acslBlock';
+            } else {
+              state = 'code';
+              acslContainer = undefined;
+              annotationStart = undefined;
+              contentStart = undefined;
+            }
+            offset = consumeLineBreak(text, escapedOffset);
+          } else {
+            offset = consumeEscapedCharacter(text, offset);
+          }
+        } else if (text[offset] === quote) {
+          state = acslContainer ?? 'code';
+          offset += 1;
+        } else if (isLineBreak(text[offset])) {
+          if (acslContainer === 'acslBlock') {
+            state = 'acslBlock';
+          } else {
+            state = 'code';
+            acslContainer = undefined;
+            annotationStart = undefined;
+            contentStart = undefined;
+          }
+          offset = consumeLineBreak(text, offset);
+        } else {
+          offset += 1;
+        }
+        break;
+      }
     }
   }
 

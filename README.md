@@ -5,8 +5,9 @@ A complete Simplified Chinese edition is available in
 
 ACSL Toolkit adds lightweight editing support for the ANSI/ISO C Specification
 Language (ACSL) inside existing C and C++ documents. It provides syntax
-highlighting, annotation-aware lexical completion, and practical snippets
-without requiring Frama-C, OCaml, a language server, or a native executable.
+highlighting, native line-comment support, annotation-aware lexical completion,
+and practical snippets without requiring Frama-C, OCaml, a language server, or
+a native executable.
 
 The extension augments the existing `c` and `cpp` language modes. It does not
 take ownership of C/C++ files or replace a C/C++ language extension.
@@ -40,6 +41,8 @@ int inspect(const int *buffer, int length);
   `predicate`, `logic`, `lemma`, `axiom`, `behavior`, and `inductive`.
 - Uses multiline declaration templates in block annotations and safe single-line
   forms in `//@` annotations.
+- Supports VS Code's normal **Toggle Line Comment** action for clause lines
+  inside block annotations.
 - Does not change the document's existing `c` or `cpp` language ID, allowing
   other C/C++ highlighting, completion, navigation, and formatting providers to
   continue operating.
@@ -48,8 +51,8 @@ int inspect(const int *buffer, int length);
 
 ### Visual Studio Marketplace
 
-After the public release, open the Extensions view in VS Code, search for
-**ACSL Toolkit**, and select **Install**.
+Open the Extensions view in VS Code, search for **ACSL Toolkit**, and select
+**Install**.
 
 ### Install a VSIX
 
@@ -93,6 +96,26 @@ ordinary comments:
 const char *text = "/*@ not an annotation */";
 int requires = 1;
 ```
+
+### Comment ACSL clauses
+
+Inside a `/*@ ... */` annotation, place the cursor on a clause line or select
+several clause lines, then run VS Code's built-in **Toggle Line Comment** action
+(`Ctrl+/` on Windows/Linux or `Cmd+/` on macOS). VS Code inserts `//` while
+preserving the surrounding ACSL annotation:
+
+```c
+/*@
+  // requires old_condition;
+  ensures new_condition;
+*/
+```
+
+The commented clause receives an ordinary comment scope, uses the theme's normal
+comment styling, and does not receive ACSL completion. Run **Toggle Line
+Comment** again to restore the clause. ACSL Toolkit intentionally provides only
+`//` line comments inside annotations: nested `/* ... */` block comments are not
+supported because C and C++ block comments do not nest.
 
 ## Snippets
 
@@ -146,9 +169,10 @@ or automatic contract generation. It also does not implement C/C++ IntelliSense.
 ## Privacy and workspace safety
 
 The extension does not collect telemetry, make network requests, start external
-processes, enumerate or open other workspace files, or write workspace files.
-Completion processes only the active document text supplied by VS Code locally
-and in memory. It supports untrusted and virtual workspaces without requesting
+processes, or enumerate or open other workspace files. Completion processes
+only the active document text supplied by VS Code locally and in memory. Clause
+commenting is performed by VS Code's built-in editor action and supports normal
+undo. The extension supports untrusted and virtual workspaces without requesting
 additional trust.
 
 ## Support and development

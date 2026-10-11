@@ -32,11 +32,11 @@ Initial annotation support is limited to:
 - `//@ ...`, ending at CR, LF, or EOF.
 
 CUDA, Objective-C, independent `.acsl` files, and other host grammar scopes are
-not part of version 0.1.0.
+not part of version 0.1.x.
 
 ## ACSL versions
 
-Version 0.1.0 exposes a single ACSL 1.24 profile. C++ documents receive the same
+Version 0.1.x exposes a single ACSL 1.24 profile. C++ documents receive the same
 shared profile; this is not a claim of complete ACSL++ support. The extension
 does not report whether a selected Frama-C release implements a catalog entry.
 
