@@ -1,0 +1,214 @@
+{
+  "$schema": "../catalog.schema.json",
+  "version": "1.24",
+  "source": {
+    "title": "ANSI/ISO C Specification Language v1.24",
+    "version": "1.24",
+    "tag": "1.24",
+    "commit": "585d28a206a7f7b06987292153cc02ca16b670ba",
+    "license": "CC-BY-4.0",
+    "url": "https://github.com/acsl-language/acsl/tree/1.24"
+  },
+  "entries": [
+    {
+      "id": "clause.requires",
+      "label": "requires",
+      "category": "clause",
+      "detail": "ACSL 1.24 · precondition clause",
+      "documentation": "States a condition that callers must establish before the specified function or statement executes.",
+      "priority": 10,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Function contracts", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/fn_behavior.tex" }
+    },
+    {
+      "id": "clause.ensures",
+      "label": "ensures",
+      "category": "clause",
+      "detail": "ACSL 1.24 · postcondition clause",
+      "documentation": "States a condition guaranteed when the described termination case is reached.",
+      "priority": 10,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Function contracts", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/fn_behavior.tex" }
+    },
+    {
+      "id": "clause.assigns",
+      "label": "assigns",
+      "category": "clause",
+      "detail": "ACSL 1.24 · frame clause",
+      "documentation": "Bounds the memory locations that an execution may modify.",
+      "priority": 12,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Function contracts", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/fn_behavior.tex" }
+    },
+    {
+      "id": "clause.assumes",
+      "label": "assumes",
+      "category": "clause",
+      "detail": "ACSL 1.24 · behavior assumption",
+      "documentation": "Selects the calls or states to which a named behavior applies.",
+      "priority": 14,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Named behaviors", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/fn_behavior.tex" }
+    },
+    {
+      "id": "clause.behavior",
+      "label": "behavior",
+      "category": "clause",
+      "detail": "ACSL 1.24 · named behavior",
+      "documentation": "Introduces a named case within a contract.",
+      "priority": 18,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Named behaviors", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/fn_behavior.tex" }
+    },
+    {
+      "id": "clause.behaviors",
+      "label": "behaviors",
+      "category": "clause",
+      "detail": "ACSL 1.24 · behavior set keyword",
+      "documentation": "Names the behavior collection used by completeness or disjointness clauses.",
+      "priority": 35,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Complete and disjoint behaviors", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/fn_behavior.tex" }
+    },
+    {
+      "id": "clause.complete",
+      "label": "complete",
+      "category": "clause",
+      "detail": "ACSL 1.24 · behavior completeness clause",
+      "documentation": "Declares that the selected behaviors cover every applicable execution.",
+      "priority": 24,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Complete and disjoint behaviors", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/fn_behavior.tex" }
+    },
+    {
+      "id": "clause.disjoint",
+      "label": "disjoint",
+      "category": "clause",
+      "detail": "ACSL 1.24 · behavior disjointness clause",
+      "documentation": "Declares that no two selected behaviors apply at the same time.",
+      "priority": 24,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Complete and disjoint behaviors", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/fn_behavior.tex" }
+    },
+    {
+      "id": "clause.terminates",
+      "label": "terminates",
+      "category": "clause",
+      "detail": "ACSL 1.24 · termination clause",
+      "documentation": "Specifies the condition under which termination is guaranteed.",
+      "priority": 18,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Function contracts", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/fn_behavior.tex" }
+    },
+    {
+      "id": "clause.decreases",
+      "label": "decreases",
+      "category": "clause",
+      "detail": "ACSL 1.24 · termination measure",
+      "documentation": "Provides a well-founded measure for recursive termination reasoning.",
+      "priority": 22,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Function contracts", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/fn_behavior.tex" }
+    },
+    {
+      "id": "clause.allocates",
+      "label": "allocates",
+      "category": "clause",
+      "detail": "ACSL 1.24 · allocation clause",
+      "documentation": "Bounds the addresses whose allocation status may become allocated.",
+      "priority": 24,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Dynamic allocation and deallocation", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/allocation.tex" }
+    },
+    {
+      "id": "clause.frees",
+      "label": "frees",
+      "category": "clause",
+      "detail": "ACSL 1.24 · deallocation clause",
+      "documentation": "Bounds the addresses whose allocation status may become released.",
+      "priority": 24,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Dynamic allocation and deallocation", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/allocation.tex" }
+    },
+    {
+      "id": "clause.assert",
+      "label": "assert",
+      "category": "clause",
+      "detail": "ACSL 1.24 · code assertion",
+      "documentation": "Introduces a property that must hold at the annotated program point.",
+      "priority": 10,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Assertions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/assertions.tex" }
+    },
+    {
+      "id": "clause.loop",
+      "label": "loop",
+      "category": "clause",
+      "detail": "ACSL 1.24 · loop annotation prefix",
+      "documentation": "Starts a clause attached to the following loop.",
+      "priority": 12,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Loop annotations", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/loops.tex" }
+    },
+    {
+      "id": "clause.invariant",
+      "label": "invariant",
+      "category": "clause",
+      "detail": "ACSL 1.24 · invariant clause",
+      "documentation": "Declares a property preserved by a loop or attached to global data.",
+      "priority": 16,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Loop and general invariants", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/loops.tex" }
+    },
+    {
+      "id": "clause.variant",
+      "label": "variant",
+      "category": "clause",
+      "detail": "ACSL 1.24 · loop variant",
+      "documentation": "Supplies a decreasing measure for a loop.",
+      "priority": 20,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Loop annotations", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/loops.tex" }
+    },
+    {
+      "id": "clause.exits",
+      "label": "exits",
+      "category": "clause",
+      "detail": "ACSL 1.24 · exit postcondition",
+      "documentation": "Describes the state when execution terminates through an exit operation.",
+      "priority": 28,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Abrupt termination", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/exitbehavior.tex" }
+    },
+    {
+      "id": "clause.breaks",
+      "label": "breaks",
+      "category": "clause",
+      "detail": "ACSL 1.24 · break postcondition",
+      "documentation": "Describes the state when a statement completes through break.",
+      "priority": 28,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Abrupt termination", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/exitbehavior.tex" }
+    },
+    {
+      "id": "clause.continues",
+      "label": "continues",
+      "category": "clause",
+      "detail": "ACSL 1.24 · continue postcondition",
+      "documentation": "Describes the state when a statement completes through continue.",
+      "priority": 28,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Abrupt termination", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/exitbehavior.tex" }
+    },
+    {
+      "id": "clause.returns",
+      "label": "returns",
+      "category": "clause",
+      "detail": "ACSL 1.24 · return postcondition",
+      "documentation": "Describes the state when a statement completes through return.",
+      "priority": 28,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Abrupt termination", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/exitbehavior.tex" }
+    }
+  ]
+}

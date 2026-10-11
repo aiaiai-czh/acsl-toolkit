@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ACSL Toolkit catalog data",
+  "oneOf": [
+    { "$ref": "#/$defs/catalogDocument" },
+    { "$ref": "#/$defs/snippetDocument" },
+    { "$ref": "#/$defs/versionsDocument" }
+  ],
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "version", "tag", "commit", "license", "url"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
+        "tag": { "const": "1.24" },
+        "commit": { "const": "585d28a206a7f7b06987292153cc02ca16b670ba" },
+        "license": { "const": "CC-BY-4.0" },
+        "url": { "type": "string", "format": "uri" }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "section", "sourceUrl"],
+      "properties": {
+        "version": { "const": "1.24" },
+        "section": { "type": "string", "minLength": 1 },
+        "sourceUrl": { "type": "string", "format": "uri" }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "category",
+        "detail",
+        "documentation",
+        "priority",
+        "insertion",
+        "spec"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9.-]+$" },
+        "label": { "type": "string", "minLength": 1 },
+        "category": {
+          "enum": [
+            "clause",
+            "keyword",
+            "logic-type",
+            "builtin-term",
+            "builtin-function",
+            "builtin-predicate",
+            "multiword"
+          ]
+        },
+        "detail": { "type": "string", "minLength": 1 },
+        "documentation": { "type": "string", "minLength": 1 },
+        "priority": { "type": "integer", "minimum": 0, "maximum": 999 },
+        "insertion": { "enum": ["plain", "snippet"] },
+        "snippetBody": { "type": "string", "minLength": 1 },
+        "aliases": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "introducedIn": { "type": "string" },
+        "removedIn": { "type": "string" },
+        "spec": { "$ref": "#/$defs/spec" }
+      }
+    },
+    "catalogDocument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["$schema", "version", "source", "entries"],
+      "properties": {
+        "$schema": { "type": "string" },
+        "version": { "const": "1.24" },
+        "source": { "$ref": "#/$defs/source" },
+        "entries": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/entry" }
+        }
+      }
+    },
+    "snippet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entryId", "body", "description"],
+      "properties": {
+        "entryId": { "type": "string", "pattern": "^[a-z][a-z0-9.-]+$" },
+        "body": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 }
+      }
+    },
+    "snippetDocument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["$schema", "version", "source", "snippets"],
+      "properties": {
+        "$schema": { "type": "string" },
+        "version": { "const": "1.24" },
+        "source": { "$ref": "#/$defs/source" },
+        "snippets": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/snippet" }
+        }
+      }
+    },
+    "version": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "release",
+        "tag",
+        "commit",
+        "releaseDate",
+        "sourceUrl",
+        "license",
+        "licenseUrl"
+      ],
+      "properties": {
+        "version": { "const": "1.24" },
+        "release": { "const": "ACSL v1.24" },
+        "tag": { "const": "1.24" },
+        "commit": { "const": "585d28a206a7f7b06987292153cc02ca16b670ba" },
+        "releaseDate": { "type": "string", "format": "date" },
+        "sourceUrl": { "type": "string", "format": "uri" },
+        "license": { "const": "CC-BY-4.0" },
+        "licenseUrl": { "type": "string", "format": "uri" }
+      }
+    },
+    "versionsDocument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["$schema", "defaultVersion", "versions"],
+      "properties": {
+        "$schema": { "type": "string" },
+        "defaultVersion": { "const": "1.24" },
+        "versions": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/version" }
+        }
+      }
+    }
+  }
+}

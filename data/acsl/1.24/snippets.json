@@ -1,0 +1,43 @@
+{
+  "$schema": "../catalog.schema.json",
+  "version": "1.24",
+  "source": {
+    "title": "ANSI/ISO C Specification Language v1.24",
+    "version": "1.24",
+    "tag": "1.24",
+    "commit": "585d28a206a7f7b06987292153cc02ca16b670ba",
+    "license": "CC-BY-4.0",
+    "url": "https://github.com/acsl-language/acsl/tree/1.24"
+  },
+  "snippets": [
+    { "entryId": "clause.requires", "body": "requires ${1:predicate};", "description": "Precondition template" },
+    { "entryId": "clause.ensures", "body": "ensures ${1:predicate};", "description": "Postcondition template" },
+    { "entryId": "clause.assigns", "body": "assigns ${1:locations};", "description": "Frame-condition template" },
+    { "entryId": "clause.assumes", "body": "assumes ${1:predicate};", "description": "Behavior assumption template" },
+    { "entryId": "clause.terminates", "body": "terminates ${1:predicate};", "description": "Termination-condition template" },
+    { "entryId": "clause.decreases", "body": "decreases ${1:term};", "description": "Termination-measure template" },
+    { "entryId": "clause.assert", "body": "assert ${1:predicate};", "description": "Code assertion template" },
+    { "entryId": "clause.allocates", "body": "allocates ${1:locations};", "description": "Allocation frame template" },
+    { "entryId": "clause.frees", "body": "frees ${1:locations};", "description": "Deallocation frame template" },
+    { "entryId": "clause.exits", "body": "exits ${1:predicate};", "description": "Exit postcondition template" },
+    { "entryId": "clause.breaks", "body": "breaks ${1:predicate};", "description": "Break postcondition template" },
+    { "entryId": "clause.continues", "body": "continues ${1:predicate};", "description": "Continue postcondition template" },
+    { "entryId": "clause.returns", "body": "returns ${1:predicate};", "description": "Return postcondition template" },
+    { "entryId": "clause.behavior", "body": "behavior ${1:name}:\n\t${2:clauses}", "description": "Named behavior template" },
+    { "entryId": "keyword.axiomatic", "body": "axiomatic ${1:name} {\n\t${2:declarations}\n}", "description": "Axiomatic block template" },
+    { "entryId": "keyword.predicate", "body": "predicate ${1:name}(${2:parameters}) = ${3:predicate};", "description": "Logic predicate definition template" },
+    { "entryId": "keyword.logic", "body": "logic ${1:return_type} ${2:name}(${3:parameters}) = ${4:term};", "description": "Logic function definition template" },
+    { "entryId": "keyword.lemma", "body": "lemma ${1:name}: ${2:predicate};", "description": "Lemma definition template" },
+    { "entryId": "keyword.axiom", "body": "axiom ${1:name}: ${2:predicate};", "description": "Axiom definition template" },
+    { "entryId": "keyword.inductive", "body": "inductive ${1:name}(${2:parameters}) {\n\tcase ${3:case_name}: ${4:predicate};\n}", "description": "Inductive predicate template" },
+    { "entryId": "keyword.case", "body": "case ${1:name}: ${2:predicate};", "description": "Inductive case template" },
+    { "entryId": "keyword.type", "body": "type ${1:name} = ${2:type_definition};", "description": "Logic type definition template" },
+    { "entryId": "multiword.loop-invariant", "body": "loop invariant ${1:predicate};", "description": "Loop invariant template" },
+    { "entryId": "multiword.loop-assigns", "body": "loop assigns ${1:locations};", "description": "Loop frame template" },
+    { "entryId": "multiword.loop-variant", "body": "loop variant ${1:term};", "description": "Loop termination-measure template" },
+    { "entryId": "multiword.loop-allocates", "body": "loop allocates ${1:locations};", "description": "Loop allocation frame template" },
+    { "entryId": "multiword.loop-frees", "body": "loop frees ${1:locations};", "description": "Loop deallocation frame template" },
+    { "entryId": "multiword.complete-behaviors", "body": "complete behaviors ${1:names};", "description": "Behavior completeness template" },
+    { "entryId": "multiword.disjoint-behaviors", "body": "disjoint behaviors ${1:names};", "description": "Behavior disjointness template" }
+  ]
+}

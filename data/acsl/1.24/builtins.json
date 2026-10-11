@@ -1,0 +1,716 @@
+{
+  "$schema": "../catalog.schema.json",
+  "version": "1.24",
+  "source": {
+    "title": "ANSI/ISO C Specification Language v1.24",
+    "version": "1.24",
+    "tag": "1.24",
+    "commit": "585d28a206a7f7b06987292153cc02ca16b670ba",
+    "license": "CC-BY-4.0",
+    "url": "https://github.com/acsl-language/acsl/tree/1.24"
+  },
+  "entries": [
+    {
+      "id": "builtin.true", "label": "\\true", "category": "builtin-term",
+      "detail": "ACSL 1.24 · Boolean constant", "documentation": "The logical truth value.",
+      "priority": 18, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Terms and predicates", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/term.tex" }
+    },
+    {
+      "id": "builtin.false", "label": "\\false", "category": "builtin-term",
+      "detail": "ACSL 1.24 · Boolean constant", "documentation": "The logical falsehood value.",
+      "priority": 18, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Terms and predicates", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/term.tex" }
+    },
+    {
+      "id": "builtin.result", "label": "\\result", "category": "builtin-term",
+      "detail": "ACSL 1.24 · result term", "documentation": "Refers to the value returned by the specified function.",
+      "priority": 10, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Old values and function results", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/oldandresult.tex" }
+    },
+    {
+      "id": "builtin.old", "label": "\\old", "category": "builtin-function",
+      "detail": "ACSL 1.24 · pre-state value", "documentation": "Evaluates a term or predicate in the function pre-state.",
+      "priority": 12, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Old values and function results", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/oldandresult.tex" }
+    },
+    {
+      "id": "builtin.at", "label": "\\at", "category": "builtin-function",
+      "detail": "ACSL 1.24 · labeled-state evaluation", "documentation": "Evaluates a term or predicate at a selected logic label.",
+      "priority": 14, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Logic labels", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/at.tex" }
+    },
+    {
+      "id": "builtin.let", "label": "\\let", "category": "keyword",
+      "detail": "ACSL 1.24 · local logic binding", "documentation": "Introduces a local name within a term or predicate.",
+      "priority": 24, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Terms and predicates", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/term.tex" }
+    },
+    {
+      "id": "builtin.forall", "label": "\\forall", "category": "keyword",
+      "detail": "ACSL 1.24 · universal quantifier", "documentation": "States that a predicate holds for every value bound by the declaration.",
+      "priority": 10, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Predicates", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/predicate.tex" }
+    },
+    {
+      "id": "builtin.exists", "label": "\\exists", "category": "keyword",
+      "detail": "ACSL 1.24 · existential quantifier", "documentation": "States that at least one bound value satisfies a predicate.",
+      "priority": 10, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Predicates", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/predicate.tex" }
+    },
+    {
+      "id": "builtin.lambda", "label": "\\lambda", "category": "keyword",
+      "detail": "ACSL 1.24 · logic abstraction", "documentation": "Constructs an anonymous logic function from binders and a term.",
+      "priority": 26, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Higher-order constructs", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/higherorder.tex" }
+    },
+    {
+      "id": "builtin.with", "label": "\\with", "category": "keyword",
+      "detail": "ACSL 1.24 · functional update", "documentation": "Builds a value by functionally updating an array or record component.",
+      "priority": 30, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Terms", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/term.tex" }
+    },
+    {
+      "id": "builtin.match", "label": "\\match", "category": "keyword",
+      "detail": "ACSL 1.24 · pattern matching", "documentation": "Selects a term by matching an algebraic value against cases.",
+      "priority": 34, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Algebraic data types", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/logictypedecl.tex" }
+    },
+    {
+      "id": "builtin.nothing", "label": "\\nothing", "category": "builtin-term",
+      "detail": "ACSL 1.24 · empty frame location set", "documentation": "Denotes that a frame or allocation clause contains no location.",
+      "priority": 14, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Function contracts", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/fn_behavior.tex" }
+    },
+    {
+      "id": "builtin.from", "label": "\\from", "category": "keyword",
+      "detail": "ACSL 1.24 · dependency clause", "documentation": "Specifies which locations an assigned value may depend on.",
+      "priority": 18, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Functional dependencies", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/dependencies.tex" }
+    },
+    {
+      "id": "builtin.empty", "label": "\\empty", "category": "builtin-term",
+      "detail": "ACSL 1.24 · empty set", "documentation": "Denotes the set with no elements.",
+      "priority": 22, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Sets and memory locations", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/loc.tex" }
+    },
+    {
+      "id": "builtin.union", "label": "\\union", "category": "builtin-function",
+      "detail": "ACSL 1.24 · set union", "documentation": "Combines the elements of one or more sets.",
+      "priority": 28, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Sets and memory locations", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/loc.tex" }
+    },
+    {
+      "id": "builtin.inter", "label": "\\inter", "category": "builtin-function",
+      "detail": "ACSL 1.24 · set intersection", "documentation": "Keeps the elements shared by each supplied set.",
+      "priority": 28, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Sets and memory locations", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/loc.tex" }
+    },
+    {
+      "id": "builtin.subset", "label": "\\subset", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · set inclusion predicate", "documentation": "Tests whether every element of one set belongs to another.",
+      "priority": 28, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Sets and memory locations", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/loc.tex" }
+    },
+    {
+      "id": "builtin.in", "label": "\\in", "category": "keyword",
+      "detail": "ACSL 1.24 · set membership operator", "documentation": "Tests whether a term belongs to a set.",
+      "priority": 32, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Sets and memory locations", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/loc.tex" }
+    },
+    {
+      "id": "builtin.max", "label": "\\max", "category": "builtin-function",
+      "detail": "ACSL 1.24 · maximum", "documentation": "Computes a maximum, including the higher-order bounded form defined by ACSL.",
+      "priority": 28, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Higher-order constructs and built-ins", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/higherorder.tex" }
+    },
+    {
+      "id": "builtin.min", "label": "\\min", "category": "builtin-function",
+      "detail": "ACSL 1.24 · minimum", "documentation": "Computes a minimum, including the higher-order bounded form defined by ACSL.",
+      "priority": 28, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Higher-order constructs and built-ins", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/higherorder.tex" }
+    },
+    {
+      "id": "builtin.sum", "label": "\\sum", "category": "builtin-function",
+      "detail": "ACSL 1.24 · bounded sum", "documentation": "Sums values produced over an integer interval.",
+      "priority": 26, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Higher-order constructs", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/higherorder.tex" }
+    },
+    {
+      "id": "builtin.product", "label": "\\product", "category": "builtin-function",
+      "detail": "ACSL 1.24 · bounded product", "documentation": "Multiplies values produced over an integer interval.",
+      "priority": 30, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Higher-order constructs", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/higherorder.tex" }
+    },
+    {
+      "id": "builtin.numof", "label": "\\numof", "category": "builtin-function",
+      "detail": "ACSL 1.24 · bounded count", "documentation": "Counts values in an interval for which a predicate is true.",
+      "priority": 30, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Higher-order constructs", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/higherorder.tex" }
+    },
+    {
+      "id": "builtin.null", "label": "\\null", "category": "builtin-term",
+      "detail": "ACSL 1.24 · null pointer", "documentation": "Denotes the null pointer value in logic expressions.",
+      "priority": 18, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Memory model", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/memory.tex" }
+    },
+    {
+      "id": "builtin.base-addr", "label": "\\base_addr", "category": "builtin-function",
+      "detail": "ACSL 1.24 · memory block base", "documentation": "Returns the base address of the block containing a pointer.",
+      "priority": 32, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Memory model", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/memory.tex" }
+    },
+    {
+      "id": "builtin.block-length", "label": "\\block_length", "category": "builtin-function",
+      "detail": "ACSL 1.24 · memory block length", "documentation": "Returns the size in bytes of the block associated with a pointer.",
+      "priority": 32, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Memory model", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/memory.tex" }
+    },
+    {
+      "id": "builtin.offset", "label": "\\offset", "category": "builtin-function",
+      "detail": "ACSL 1.24 · pointer block offset", "documentation": "Returns a pointer's byte offset from the base of its memory block.",
+      "priority": 34, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Memory model", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/memory.tex" }
+    },
+    {
+      "id": "builtin.allocation", "label": "\\allocation", "category": "builtin-function",
+      "detail": "ACSL 1.24 · allocation status", "documentation": "Returns the allocation status of the block associated with a pointer.",
+      "priority": 42, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Dynamic allocation and deallocation", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/memory.tex" }
+    },
+    {
+      "id": "builtin.allocable", "label": "\\allocable", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · allocation predicate", "documentation": "Tests whether a pointer designates a base address available for allocation.",
+      "priority": 32, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Dynamic allocation and deallocation", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/memory.tex" }
+    },
+    {
+      "id": "builtin.freeable", "label": "\\freeable", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · deallocation predicate", "documentation": "Tests whether a pointer designates an allocated block that can be released.",
+      "priority": 32, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Dynamic allocation and deallocation", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/memory.tex" }
+    },
+    {
+      "id": "builtin.fresh", "label": "\\fresh", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · fresh allocation predicate", "documentation": "Relates two states to express that a block was newly allocated with a given size.",
+      "priority": 22, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Dynamic allocation and deallocation", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/memory.tex" }
+    },
+    {
+      "id": "builtin.valid", "label": "\\valid", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · writable validity predicate", "documentation": "Tests whether every selected location may be read and written in the chosen state.",
+      "priority": 10, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Memory model", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/memory.tex" }
+    },
+    {
+      "id": "builtin.valid-read", "label": "\\valid_read", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · readable validity predicate", "documentation": "Tests whether every selected location may be read in the chosen state.",
+      "priority": 11, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Memory model", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/memory.tex" }
+    },
+    {
+      "id": "builtin.separated", "label": "\\separated", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · memory separation predicate", "documentation": "Tests whether the supplied sets of locations occupy disjoint memory regions.",
+      "priority": 14, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Memory model", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/memory.tex" }
+    },
+    {
+      "id": "builtin.object-pointer", "label": "\\object_pointer", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · object pointer predicate", "documentation": "Tests whether selected locations are represented by pointers to objects.",
+      "priority": 38, "insertion": "plain", "introducedIn": "1.19",
+      "spec": { "version": "1.24", "section": "Memory model", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/memory.tex" }
+    },
+    {
+      "id": "builtin.pointer-comparable", "label": "\\pointer_comparable", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · pointer comparison predicate", "documentation": "Tests whether relational comparison of two pointers has defined meaning.",
+      "priority": 38, "insertion": "plain", "introducedIn": "1.19",
+      "spec": { "version": "1.24", "section": "Memory model", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/memory.tex" }
+    },
+    {
+      "id": "builtin.aligned", "label": "\\aligned", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · pointer alignment predicate", "documentation": "Tests whether a pointer satisfies the supplied alignment boundary.",
+      "priority": 30, "insertion": "plain", "introducedIn": "1.23",
+      "spec": { "version": "1.24", "section": "Memory model", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/memory.tex" }
+    },
+    {
+      "id": "builtin.initialized", "label": "\\initialized", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · initialization predicate", "documentation": "Tests whether the value at a location is initialized in the selected state.",
+      "priority": 18, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Initialization and dangling pointers", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/initialized.tex" }
+    },
+    {
+      "id": "builtin.dangling", "label": "\\dangling", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · dangling-pointer predicate", "documentation": "Tests whether a location contains an indeterminate or dangling pointer value.",
+      "priority": 28, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Initialization and dangling pointers", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/initialized.tex" }
+    },
+    {
+      "id": "builtin.valid-function", "label": "\\valid_function", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · function pointer predicate", "documentation": "Tests whether selected pointer values may be called as functions.",
+      "priority": 36, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Function pointers", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/welltyped.tex" }
+    },
+    {
+      "id": "builtin.exit-status", "label": "\\exit_status", "category": "builtin-term",
+      "detail": "ACSL 1.24 · process exit status", "documentation": "Refers to the status value associated with an exit termination.",
+      "priority": 32, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Abrupt termination", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/exitbehavior.tex" }
+    },
+    {
+      "id": "builtin.ghost-qualifier", "label": "\\ghost", "category": "keyword",
+      "detail": "ACSL 1.24 · ghost type qualifier", "documentation": "Qualifies C declarations that are usable only from ghost code.",
+      "priority": 38, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Ghost code", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/ghost.tex" }
+    },
+    {
+      "id": "logic-type.list", "label": "\\list", "category": "logic-type",
+      "detail": "ACSL 1.24 · finite list type", "documentation": "Forms a homogeneous finite-sequence type.",
+      "priority": 34, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Finite lists", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.list-nil", "label": "\\Nil", "category": "builtin-term",
+      "detail": "ACSL 1.24 · empty finite list", "documentation": "Constructs an empty finite list.",
+      "priority": 38, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Finite lists", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.list-cons", "label": "\\Cons", "category": "builtin-function",
+      "detail": "ACSL 1.24 · finite list constructor", "documentation": "Prepends an element to a finite list.",
+      "priority": 38, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Finite lists", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.concat", "label": "\\concat", "category": "builtin-function",
+      "detail": "ACSL 1.24 · finite list concatenation", "documentation": "Appends one finite list to another.",
+      "priority": 40, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Finite lists", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.repeat", "label": "\\repeat", "category": "builtin-function",
+      "detail": "ACSL 1.24 · finite list repetition", "documentation": "Repeats a finite list a specified number of times.",
+      "priority": 40, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Finite lists", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.length", "label": "\\length", "category": "builtin-function",
+      "detail": "ACSL 1.24 · finite list length", "documentation": "Returns the number of elements in a finite list.",
+      "priority": 36, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Finite lists", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.nth", "label": "\\nth", "category": "builtin-function",
+      "detail": "ACSL 1.24 · finite list access", "documentation": "Returns the element at a zero-based list position.",
+      "priority": 36, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Finite lists", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.abs", "label": "\\abs", "category": "builtin-function",
+      "detail": "ACSL 1.24 · absolute value", "documentation": "Returns the nonnegative magnitude of an integer or real value.",
+      "priority": 30, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.sqrt", "label": "\\sqrt", "category": "builtin-function",
+      "detail": "ACSL 1.24 · square root", "documentation": "Returns the mathematical square root of a real value.",
+      "priority": 36, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.pow-real", "label": "\\pow", "category": "builtin-function",
+      "detail": "ACSL 1.24 · real exponentiation", "documentation": "Raises a real value to a real power.",
+      "priority": 38, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.pow-integer", "label": "pow", "category": "builtin-function",
+      "detail": "ACSL 1.24 · integer exponentiation", "documentation": "Raises an integer value to an integer power.",
+      "priority": 46, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.ceil", "label": "\\ceil", "category": "builtin-function",
+      "detail": "ACSL 1.24 · mathematical ceiling", "documentation": "Returns the least integer not smaller than a real value.",
+      "priority": 38, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.floor", "label": "\\floor", "category": "builtin-function",
+      "detail": "ACSL 1.24 · mathematical floor", "documentation": "Returns the greatest integer not larger than a real value.",
+      "priority": 38, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.e", "label": "\\e", "category": "builtin-term",
+      "detail": "ACSL 1.24 · Euler constant", "documentation": "Denotes the base of the natural logarithm.",
+      "priority": 50, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.pi", "label": "\\pi", "category": "builtin-term",
+      "detail": "ACSL 1.24 · circle constant", "documentation": "Denotes the mathematical constant pi.",
+      "priority": 46, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.exp", "label": "\\exp", "category": "builtin-function",
+      "detail": "ACSL 1.24 · exponential function", "documentation": "Returns the natural exponential of a real value.",
+      "priority": 42, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.log", "label": "\\log", "category": "builtin-function",
+      "detail": "ACSL 1.24 · natural logarithm", "documentation": "Returns the natural logarithm of a real value.",
+      "priority": 42, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.log10", "label": "\\log10", "category": "builtin-function",
+      "detail": "ACSL 1.24 · base-10 logarithm", "documentation": "Returns the base-10 logarithm of a real value.",
+      "priority": 44, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.sin", "label": "\\sin", "category": "builtin-function",
+      "detail": "ACSL 1.24 · sine", "documentation": "Returns the sine of a real value.",
+      "priority": 44, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.cos", "label": "\\cos", "category": "builtin-function",
+      "detail": "ACSL 1.24 · cosine", "documentation": "Returns the cosine of a real value.",
+      "priority": 44, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.tan", "label": "\\tan", "category": "builtin-function",
+      "detail": "ACSL 1.24 · tangent", "documentation": "Returns the tangent of a real value.",
+      "priority": 44, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.cosh", "label": "\\cosh", "category": "builtin-function",
+      "detail": "ACSL 1.24 · hyperbolic cosine", "documentation": "Returns the hyperbolic cosine of a real value.",
+      "priority": 48, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.sinh", "label": "\\sinh", "category": "builtin-function",
+      "detail": "ACSL 1.24 · hyperbolic sine", "documentation": "Returns the hyperbolic sine of a real value.",
+      "priority": 48, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.tanh", "label": "\\tanh", "category": "builtin-function",
+      "detail": "ACSL 1.24 · hyperbolic tangent", "documentation": "Returns the hyperbolic tangent of a real value.",
+      "priority": 48, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.asin", "label": "\\asin", "category": "builtin-function",
+      "detail": "ACSL 1.24 · inverse sine", "documentation": "Returns the inverse sine of a real value.",
+      "priority": 48, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.acos", "label": "\\acos", "category": "builtin-function",
+      "detail": "ACSL 1.24 · inverse cosine", "documentation": "Returns the inverse cosine of a real value.",
+      "priority": 48, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.atan", "label": "\\atan", "category": "builtin-function",
+      "detail": "ACSL 1.24 · inverse tangent", "documentation": "Returns the inverse tangent of a real value.",
+      "priority": 48, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.asinh", "label": "\\asinh", "category": "builtin-function",
+      "detail": "ACSL 1.24 · inverse hyperbolic sine", "documentation": "Returns the inverse hyperbolic sine of a real value.",
+      "priority": 52, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.acosh", "label": "\\acosh", "category": "builtin-function",
+      "detail": "ACSL 1.24 · inverse hyperbolic cosine", "documentation": "Returns the inverse hyperbolic cosine of a real value.",
+      "priority": 52, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.atanh", "label": "\\atanh", "category": "builtin-function",
+      "detail": "ACSL 1.24 · inverse hyperbolic tangent", "documentation": "Returns the inverse hyperbolic tangent of a real value.",
+      "priority": 52, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.atan2", "label": "\\atan2", "category": "builtin-function",
+      "detail": "ACSL 1.24 · two-argument arctangent", "documentation": "Returns the angle determined by a pair of real coordinates.",
+      "priority": 48, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.hypot", "label": "\\hypot", "category": "builtin-function",
+      "detail": "ACSL 1.24 · Euclidean norm", "documentation": "Returns the hypotenuse formed by two real values.",
+      "priority": 48, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.round-float", "label": "\\round_float", "category": "builtin-function",
+      "detail": "ACSL 1.24 · explicit float rounding", "documentation": "Rounds a real value to float using an explicit rounding mode.",
+      "priority": 44, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point casts", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.round-double", "label": "\\round_double", "category": "builtin-function",
+      "detail": "ACSL 1.24 · explicit double rounding", "documentation": "Rounds a real value to double using an explicit rounding mode.",
+      "priority": 44, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point casts", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.is-finite", "label": "\\is_finite", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · finite floating-point predicate", "documentation": "Tests whether a float or double is finite.",
+      "priority": 40, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point values", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.is-nan", "label": "\\is_NaN", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · NaN predicate", "documentation": "Tests whether a float or double is a not-a-number value.",
+      "priority": 40, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point values", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.is-plus-infinity", "label": "\\is_plus_infinity", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · positive infinity predicate", "documentation": "Tests whether a float or double is positive infinity.",
+      "priority": 44, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point values", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.is-minus-infinity", "label": "\\is_minus_infinity", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · negative infinity predicate", "documentation": "Tests whether a float or double is negative infinity.",
+      "priority": 44, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point values", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.is-infinite", "label": "\\is_infinite", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · infinity predicate", "documentation": "Tests whether a float or double is either positive or negative infinity.",
+      "priority": 44, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point values", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.sign", "label": "\\sign", "category": "builtin-function",
+      "detail": "ACSL 1.24 · floating-point sign", "documentation": "Returns the positive or negative sign of a non-NaN floating-point value.",
+      "priority": 46, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point sign", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.eq-float", "label": "\\eq_float", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · C float equality", "documentation": "Models C equality for float values, including IEEE-754 special cases.",
+      "priority": 52, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point comparisons", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.eq-double", "label": "\\eq_double", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · C double equality", "documentation": "Models C equality for double values, including IEEE-754 special cases.",
+      "priority": 52, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point comparisons", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.gt-float", "label": "\\gt_float", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · C float greater-than", "documentation": "Models C greater-than comparison for float values.",
+      "priority": 54, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point comparisons", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.gt-double", "label": "\\gt_double", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · C double greater-than", "documentation": "Models C greater-than comparison for double values.",
+      "priority": 54, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point comparisons", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.ge-float", "label": "\\ge_float", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · C float greater-or-equal", "documentation": "Models C greater-than-or-equal comparison for float values.",
+      "priority": 54, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point comparisons", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.ge-double", "label": "\\ge_double", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · C double greater-or-equal", "documentation": "Models C greater-than-or-equal comparison for double values.",
+      "priority": 54, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point comparisons", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.lt-float", "label": "\\lt_float", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · C float less-than", "documentation": "Models C less-than comparison for float values.",
+      "priority": 54, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point comparisons", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.lt-double", "label": "\\lt_double", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · C double less-than", "documentation": "Models C less-than comparison for double values.",
+      "priority": 54, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point comparisons", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.le-float", "label": "\\le_float", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · C float less-or-equal", "documentation": "Models C less-than-or-equal comparison for float values.",
+      "priority": 54, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point comparisons", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.le-double", "label": "\\le_double", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · C double less-or-equal", "documentation": "Models C less-than-or-equal comparison for double values.",
+      "priority": 54, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point comparisons", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.ne-float", "label": "\\ne_float", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · C float inequality", "documentation": "Models C inequality for float values.",
+      "priority": 54, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point comparisons", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.ne-double", "label": "\\ne_double", "category": "builtin-predicate",
+      "detail": "ACSL 1.24 · C double inequality", "documentation": "Models C inequality for double values.",
+      "priority": 54, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point comparisons", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
+    },
+    {
+      "id": "builtin.exact", "label": "\\exact", "category": "builtin-function",
+      "detail": "ACSL 1.24 · exact real-value model", "documentation": "Interprets a floating-point lvalue as its ideal exact real value.",
+      "priority": 42, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Exact computations", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.round-error", "label": "\\round_error", "category": "builtin-function",
+      "detail": "ACSL 1.24 · floating-point roundoff error", "documentation": "Returns the magnitude of the difference between a value and its exact model.",
+      "priority": 42, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Exact computations", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.real-of-float", "label": "real_of_float", "category": "builtin-function",
+      "detail": "ACSL 1.24 · float-to-real promotion", "documentation": "Represents the logic promotion of a float to a mathematical real.",
+      "priority": 58, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Real and floating-point numbers", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.real-of-double", "label": "real_of_double", "category": "builtin-function",
+      "detail": "ACSL 1.24 · double-to-real promotion", "documentation": "Represents the logic promotion of a double to a mathematical real.",
+      "priority": 58, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Real and floating-point numbers", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.label-here", "label": "Here", "category": "builtin-term",
+      "detail": "ACSL 1.24 · current-state label", "documentation": "Names the current evaluation state.",
+      "priority": 44, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Logic labels", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/at.tex" }
+    },
+    {
+      "id": "builtin.label-old", "label": "Old", "category": "builtin-term",
+      "detail": "ACSL 1.24 · function pre-state label", "documentation": "Names the state before entering the current function.",
+      "priority": 44, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Logic labels", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/at.tex" }
+    },
+    {
+      "id": "builtin.label-pre", "label": "Pre", "category": "builtin-term",
+      "detail": "ACSL 1.24 · contract pre-state label", "documentation": "Names the state before the contracted operation.",
+      "priority": 44, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Logic labels", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/at.tex" }
+    },
+    {
+      "id": "builtin.label-post", "label": "Post", "category": "builtin-term",
+      "detail": "ACSL 1.24 · contract post-state label", "documentation": "Names the state after normal completion of the contracted operation.",
+      "priority": 44, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Logic labels", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/at.tex" }
+    },
+    {
+      "id": "builtin.label-init", "label": "Init", "category": "builtin-term",
+      "detail": "ACSL 1.24 · initial-state label", "documentation": "Names the program initialization state.",
+      "priority": 48, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Logic labels", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/at.tex" }
+    },
+    {
+      "id": "builtin.label-loop-entry", "label": "LoopEntry", "category": "builtin-term",
+      "detail": "ACSL 1.24 · loop-entry label", "documentation": "Names the state immediately before entering a loop.",
+      "priority": 46, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Logic labels", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/at.tex" }
+    },
+    {
+      "id": "builtin.label-loop-current", "label": "LoopCurrent", "category": "builtin-term",
+      "detail": "ACSL 1.24 · loop-current label", "documentation": "Names the current state during evaluation of a loop annotation.",
+      "priority": 46, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Logic labels", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/at.tex" }
+    },
+    {
+      "id": "builtin.round-up", "label": "\\Up", "category": "builtin-term",
+      "detail": "ACSL 1.24 · upward rounding mode", "documentation": "Selects rounding toward positive infinity.",
+      "priority": 58, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point casts", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.round-down", "label": "\\Down", "category": "builtin-term",
+      "detail": "ACSL 1.24 · downward rounding mode", "documentation": "Selects rounding toward negative infinity.",
+      "priority": 58, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point casts", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.round-zero", "label": "\\ToZero", "category": "builtin-term",
+      "detail": "ACSL 1.24 · toward-zero rounding mode", "documentation": "Selects rounding toward zero.",
+      "priority": 58, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point casts", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.round-nearest-away", "label": "\\NearestAway", "category": "builtin-term",
+      "detail": "ACSL 1.24 · nearest-away rounding mode", "documentation": "Selects nearest-value rounding with ties away from zero.",
+      "priority": 58, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point casts", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.round-nearest-even", "label": "\\NearestEven", "category": "builtin-term",
+      "detail": "ACSL 1.24 · nearest-even rounding mode", "documentation": "Selects nearest-value rounding with ties resolved to an even significand.",
+      "priority": 58, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point casts", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.sign-positive", "label": "\\Positive", "category": "builtin-term",
+      "detail": "ACSL 1.24 · positive sign value", "documentation": "Represents a positive floating-point sign.",
+      "priority": 60, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point sign", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.sign-negative", "label": "\\Negative", "category": "builtin-term",
+      "detail": "ACSL 1.24 · negative sign value", "documentation": "Represents a negative floating-point sign.",
+      "priority": 60, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point sign", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.allocation-static", "label": "\\static", "category": "builtin-term",
+      "detail": "ACSL 1.24 · static allocation status", "documentation": "Represents storage with static allocation duration.",
+      "priority": 62, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Dynamic allocation and deallocation", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.allocation-register", "label": "\\register", "category": "builtin-term",
+      "detail": "ACSL 1.24 · register allocation status", "documentation": "Represents storage declared with register allocation status.",
+      "priority": 62, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Dynamic allocation and deallocation", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.allocation-automatic", "label": "\\automatic", "category": "builtin-term",
+      "detail": "ACSL 1.24 · automatic allocation status", "documentation": "Represents storage with automatic allocation duration.",
+      "priority": 62, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Dynamic allocation and deallocation", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.allocation-dynamic", "label": "\\dynamic", "category": "builtin-term",
+      "detail": "ACSL 1.24 · dynamic allocation status", "documentation": "Represents a currently allocated dynamic memory block.",
+      "priority": 62, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Dynamic allocation and deallocation", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "builtin.allocation-unallocated", "label": "\\unallocated", "category": "builtin-term",
+      "detail": "ACSL 1.24 · unallocated status", "documentation": "Represents a memory block that is not currently allocated.",
+      "priority": 62, "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Dynamic allocation and deallocation", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "ACSL annotation injection",
+  "scopeName": "acsl.injection",
+  "injectionSelector": "L:source.c -comment -string, L:source.cpp -comment -string",
+  "patterns": [
+    {
+      "name": "meta.annotation.block.acsl",
+      "contentName": "meta.embedded.block.acsl",
+      "begin": "([ \\t]*)(/\\*@)",
+      "beginCaptures": {
+        "2": {
+          "name": "comment.block.acsl punctuation.definition.comment.begin.acsl"
+        }
+      },
+      "end": "\\*/",
+      "endCaptures": {
+        "0": {
+          "name": "comment.block.acsl punctuation.definition.comment.end.acsl"
+        }
+      },
+      "patterns": [
+        { "include": "source.acsl" }
+      ]
+    },
+    {
+      "name": "meta.annotation.line.acsl",
+      "contentName": "meta.embedded.inline.acsl",
+      "begin": "([ \\t]*)(//@)",
+      "beginCaptures": {
+        "2": {
+          "name": "comment.line.double-slash.acsl punctuation.definition.comment.acsl"
+        }
+      },
+      "end": "(?=$)",
+      "patterns": [
+        { "include": "source.acsl" }
+      ]
+    }
+  ]
+}

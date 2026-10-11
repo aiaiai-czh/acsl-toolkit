@@ -1,0 +1,315 @@
+{
+  "$schema": "../catalog.schema.json",
+  "version": "1.24",
+  "source": {
+    "title": "ANSI/ISO C Specification Language v1.24",
+    "version": "1.24",
+    "tag": "1.24",
+    "commit": "585d28a206a7f7b06987292153cc02ca16b670ba",
+    "license": "CC-BY-4.0",
+    "url": "https://github.com/acsl-language/acsl/tree/1.24"
+  },
+  "entries": [
+    {
+      "id": "keyword.admit",
+      "label": "admit",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · non-blocking clause modifier",
+      "documentation": "Marks a property as accepted without requiring it to be established by verification.",
+      "priority": 34,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Clause kinds", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/fn_behavior.tex" }
+    },
+    {
+      "id": "keyword.check",
+      "label": "check",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · non-blocking clause modifier",
+      "documentation": "Requests checking without making the property available as a proved fact.",
+      "priority": 34,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Clause kinds", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/fn_behavior.tex" }
+    },
+    {
+      "id": "keyword.logic",
+      "label": "logic",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · logic declaration",
+      "documentation": "Introduces a logic constant or function declaration or definition.",
+      "priority": 20,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Logic definitions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/logic.tex" }
+    },
+    {
+      "id": "keyword.predicate",
+      "label": "predicate",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · predicate declaration",
+      "documentation": "Introduces a named logical proposition.",
+      "priority": 18,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Logic definitions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/logic.tex" }
+    },
+    {
+      "id": "keyword.lemma",
+      "label": "lemma",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · lemma declaration",
+      "documentation": "Names a logical property intended to be proved and reused.",
+      "priority": 24,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Lemmas", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/logic.tex" }
+    },
+    {
+      "id": "keyword.inductive",
+      "label": "inductive",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · inductive predicate",
+      "documentation": "Introduces a predicate characterized by a collection of cases.",
+      "priority": 28,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Inductive predicates", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/inductive.tex" }
+    },
+    {
+      "id": "keyword.case",
+      "label": "case",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · inductive or pattern case",
+      "documentation": "Introduces one constructor case of an inductive definition or match expression.",
+      "priority": 38,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Inductive predicates and pattern matching", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/inductive.tex" }
+    },
+    {
+      "id": "keyword.axiomatic",
+      "label": "axiomatic",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · axiomatic block",
+      "documentation": "Groups abstract logic declarations and their axioms.",
+      "priority": 26,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Axiomatic declarations", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/logicdecl.tex" }
+    },
+    {
+      "id": "keyword.axiom",
+      "label": "axiom",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · axiom declaration",
+      "documentation": "Introduces an assumed property inside an axiomatic block.",
+      "priority": 28,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Axiomatic declarations", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/logicdecl.tex" }
+    },
+    {
+      "id": "keyword.type",
+      "label": "type",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · logic type declaration",
+      "documentation": "Introduces a named logic type or type definition.",
+      "priority": 25,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Logic types", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/logictypedecl.tex" }
+    },
+    {
+      "id": "keyword.reads",
+      "label": "reads",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · logic read-set clause",
+      "documentation": "Declares the locations on which a logic function or predicate depends.",
+      "priority": 28,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Logic read dependencies", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/logicreads.tex" }
+    },
+    {
+      "id": "keyword.writes",
+      "label": "writes",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · volatile write handler",
+      "documentation": "Names the logic function used to model writes to declared volatile locations.",
+      "priority": 52,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Volatile variables", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/volatile-gram.tex" }
+    },
+    {
+      "id": "keyword.ghost",
+      "label": "ghost",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · ghost code",
+      "documentation": "Marks specification-only declarations, parameters, arguments, fields, or statements.",
+      "priority": 22,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Ghost code", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/ghost.tex" }
+    },
+    {
+      "id": "keyword.model",
+      "label": "model",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · model variable",
+      "documentation": "Introduces a specification-only model variable or field.",
+      "priority": 30,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Model variables", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/model.tex" }
+    },
+    {
+      "id": "keyword.global",
+      "label": "global",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · global invariant prefix",
+      "documentation": "Qualifies an invariant that constrains global program state.",
+      "priority": 36,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Data invariants", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/data_invariants.tex" }
+    },
+    {
+      "id": "keyword.weak",
+      "label": "weak",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · invariant strength",
+      "documentation": "Selects weak semantics for a global or type invariant.",
+      "priority": 45,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Data invariants", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/data_invariants.tex" }
+    },
+    {
+      "id": "keyword.strong",
+      "label": "strong",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · invariant strength",
+      "documentation": "Selects strong semantics for a global or type invariant.",
+      "priority": 45,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Data invariants", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/data_invariants.tex" }
+    },
+    {
+      "id": "keyword.as",
+      "label": "as",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · pattern binding",
+      "documentation": "Binds a matched pattern to an identifier.",
+      "priority": 48,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Algebraic data types", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/logictypedecl.tex" }
+    },
+    {
+      "id": "keyword.for",
+      "label": "for",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · relation or behavior qualifier",
+      "documentation": "Introduces a relation name or limits an annotation to named behaviors.",
+      "priority": 48,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Contracts and annotations", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/fn_behavior.tex" }
+    },
+    {
+      "id": "keyword.sizeof",
+      "label": "sizeof",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · size operator",
+      "documentation": "Computes the size of a term or C type in a logic expression.",
+      "priority": 42,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Terms", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/term.tex" }
+    },
+    {
+      "id": "keyword.alignof",
+      "label": "alignof",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · alignment operator",
+      "documentation": "Computes the alignment requirement of a C type.",
+      "priority": 42,
+      "insertion": "plain",
+      "introducedIn": "1.23",
+      "spec": { "version": "1.24", "section": "Terms", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/term.tex" }
+    },
+    {
+      "id": "keyword.c-alignof",
+      "label": "_Alignof",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · legacy alignment spelling",
+      "documentation": "Legacy spelling of the alignment operator; alignof is preferred by the specification.",
+      "priority": 60,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Terms", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/term.tex" }
+    },
+    {
+      "id": "logic-type.boolean",
+      "label": "boolean",
+      "category": "logic-type",
+      "detail": "ACSL 1.24 · mathematical Boolean type",
+      "documentation": "The built-in type of logical truth values.",
+      "priority": 18,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in logic types", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/binders.tex" }
+    },
+    {
+      "id": "logic-type.integer",
+      "label": "integer",
+      "category": "logic-type",
+      "detail": "ACSL 1.24 · mathematical integer type",
+      "documentation": "The built-in unbounded integer type.",
+      "priority": 16,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in logic types", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/binders.tex" }
+    },
+    {
+      "id": "logic-type.real",
+      "label": "real",
+      "category": "logic-type",
+      "detail": "ACSL 1.24 · mathematical real type",
+      "documentation": "The built-in mathematical real-number type.",
+      "priority": 18,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Built-in logic types", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/binders.tex" }
+    },
+    {
+      "id": "logic-type.set",
+      "label": "set",
+      "category": "logic-type",
+      "detail": "ACSL 1.24 · set type constructor",
+      "documentation": "Forms a homogeneous set type such as set<int*>.",
+      "priority": 32,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Sets and memory locations", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "logic-type.allocation-status",
+      "label": "allocation_status",
+      "category": "logic-type",
+      "detail": "ACSL 1.24 · allocation status type",
+      "documentation": "Represents the allocation state associated with a memory block.",
+      "priority": 40,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Dynamic allocation and deallocation", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "logic-type.rounding-mode",
+      "label": "rounding_mode",
+      "category": "logic-type",
+      "detail": "ACSL 1.24 · floating-point rounding mode",
+      "documentation": "Names the mode used by explicit floating-point rounding functions.",
+      "priority": 42,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point casts", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "logic-type.sign",
+      "label": "sign",
+      "category": "logic-type",
+      "detail": "ACSL 1.24 · floating-point sign type",
+      "documentation": "Represents the positive or negative sign of a floating-point value.",
+      "priority": 44,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Floating-point sign", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/speclang_modern.tex" }
+    },
+    {
+      "id": "keyword.volatile",
+      "label": "volatile",
+      "category": "keyword",
+      "detail": "ACSL 1.24 · volatile access specification",
+      "documentation": "Introduces a global annotation describing reads and writes of volatile locations.",
+      "priority": 52,
+      "insertion": "plain",
+      "spec": { "version": "1.24", "section": "Volatile variables", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/volatile-gram.tex" }
+    }
+  ]
+}

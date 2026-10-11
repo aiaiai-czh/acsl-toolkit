@@ -1,0 +1,96 @@
+name: Release VSIX
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Validate and build release artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: release
+    permissions:
+      contents: read
+    env:
+      EXPECTED_VSCODE_PUBLISHER: ${{ vars.VSCODE_PUBLISHER }}
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Require tag and manifest versions to match
+        shell: bash
+        run: |
+          tag_version="${GITHUB_REF_NAME#v}"
+          node -e "const actual=require('./package.json').version; const expected=process.argv[1]; if (actual !== expected) { console.error('package.json version ' + actual + ' does not match tag ' + expected); process.exit(1); }" "$tag_version"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate and build release VSIX
+        run: npm run package:release
+
+      - name: Generate SHA-256 checksum
+        shell: bash
+        run: |
+          mapfile -t packages < <(find . -maxdepth 1 -type f -name '*.vsix' -print)
+          if [[ "${#packages[@]}" -ne 1 ]]; then
+            echo "Expected exactly one VSIX, found ${#packages[@]}" >&2
+            exit 1
+          fi
+          sha256sum "${packages[0]}" > "${packages[0]}.sha256"
+
+      - name: Upload verified release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: acsl-toolkit-${{ github.ref_name }}
+          path: |
+            *.vsix
+            *.vsix.sha256
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    name: Create GitHub release
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download verified release artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: acsl-toolkit-${{ github.ref_name }}
+          path: release-assets
+
+      - name: Create GitHub release
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create "${GITHUB_REF_NAME}"
+          ./release-assets/*.vsix ./release-assets/*.vsix.sha256
+          --verify-tag
+          --generate-notes
+          --title "${GITHUB_REF_NAME}"

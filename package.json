@@ -1,0 +1,133 @@
+{
+  "name": "acsl-toolkit",
+  "displayName": "ACSL Toolkit",
+  "description": "ACSL syntax highlighting, annotation-aware completion, and snippets inside C and C++ documents.",
+  "version": "0.1.0",
+  "publisher": "acsl-toolkit",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aiaiai-czh/acsl-toolkit.git"
+  },
+  "homepage": "https://github.com/aiaiai-czh/acsl-toolkit#readme",
+  "bugs": {
+    "url": "https://github.com/aiaiai-czh/acsl-toolkit/issues"
+  },
+  "license": "MIT",
+  "private": true,
+  "preview": true,
+  "pricing": "Free",
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#071840",
+    "theme": "dark"
+  },
+  "engines": {
+    "vscode": "^1.85.0",
+    "node": ">=22.13.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets"
+  ],
+  "keywords": [
+    "ACSL",
+    "C",
+    "C++",
+    "formal specification",
+    "formal methods",
+    "code contracts",
+    "syntax highlighting",
+    "autocomplete",
+    "Frama-C"
+  ],
+  "browser": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:c",
+    "onLanguage:cpp"
+  ],
+  "capabilities": {
+    "virtualWorkspaces": {
+      "supported": true
+    },
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "acsl",
+        "aliases": [
+          "ACSL"
+        ],
+        "configuration": "./syntaxes/acsl-language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "acsl",
+        "scopeName": "source.acsl",
+        "path": "./syntaxes/acsl.tmLanguage.json"
+      },
+      {
+        "scopeName": "acsl.injection",
+        "path": "./syntaxes/acsl-injection.tmLanguage.json",
+        "injectTo": [
+          "source.c",
+          "source.cpp"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.acsl": "acsl",
+          "meta.embedded.inline.acsl": "acsl"
+        },
+        "tokenTypes": {
+          "meta.embedded.block.acsl": "other",
+          "meta.embedded.inline.acsl": "other"
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "bundle": "node esbuild.mjs",
+    "bundle:extension": "node esbuild.mjs --extension-only",
+    "bundle:tests": "node esbuild.mjs --tests-only",
+    "watch": "node esbuild.mjs --watch",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "validate:catalog": "node scripts/validate-catalog.mjs",
+    "validate:package-contents": "npm run bundle:extension && node scripts/validate-package-contents.mjs",
+    "validate:release": "node scripts/validate-release.mjs",
+    "generate:grammar": "node scripts/generate-grammar.mjs",
+    "generate:grammar:check": "node scripts/generate-grammar.mjs --check",
+    "check": "npm run validate:catalog && npm run generate:grammar:check && npm run lint && npm run typecheck",
+    "test": "npm run test:coverage && npm run test:performance && npm run test:grammar",
+    "test:unit": "vitest run test/unit",
+    "test:coverage": "vitest run test/unit --coverage --exclude test/unit/performance.test.ts",
+    "test:performance": "vitest run test/unit/performance.test.ts",
+    "test:grammar": "vitest run test/grammar",
+    "test:integration:desktop": "npm run bundle && node scripts/run-desktop-tests.mjs",
+    "test:integration:web": "npm run bundle && vscode-test-web --quality=stable --browser=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/test/integration/web/index.js test/integration/fixtures/workspace",
+    "vscode:prepublish": "npm run bundle:extension",
+    "package": "npm run check && npm run test && npm run validate:package-contents && vsce package --no-dependencies",
+    "package:release": "npm run validate:release && npm run package"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.0.0",
+    "@types/vscode": "1.85.0",
+    "@vitest/coverage-v8": "^5.0.3",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/test-web": "^0.0.81",
+    "@vscode/vsce": "^4.0.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
+    "mocha": "^12.0.3",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.1",
+    "vitest": "^5.0.3",
+    "vscode-oniguruma": "^2.0.1",
+    "vscode-textmate": "^9.3.2"
+  }
+}

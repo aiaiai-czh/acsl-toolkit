@@ -1,0 +1,134 @@
+# Architecture
+
+## Goals and boundaries
+
+ACSL Toolkit adds editor assistance to documents that remain owned by VS Code's
+existing C and C++ language services. The extension recognizes annotation
+boundaries, offers lexical data, and colors ACSL tokens. It does not build a C
+or ACSL syntax tree and does not execute verification tools.
+
+The design has four independent layers:
+
+```text
+C/C++ TextDocument (languageId: c or cpp)
+├── TextMate engine
+│   └── ACSL injection grammar
+└── Web Extension Host
+    └── Completion provider
+        ├── C/C++ lexical context scanner
+        ├── ACSL prefix extractor
+        └── versioned completion catalog
+```
+
+Keeping the grammar and completion context scanner independent is intentional.
+VS Code extensions cannot reliably query TextMate scopes through the public API,
+and either implementation can therefore be tested without the editor process.
+Their regression suites exercise the same annotation, comment, and literal
+boundaries so reviews can detect behavioral drift.
+
+## Extension boundary
+
+`src/extension.ts` registers one completion provider for the `c` and `cpp`
+language ids with `\` as its only trigger character. It does not register file
+extensions, change language associations, launch a child process, read a
+workspace, or write files. The manifest exposes only a `browser` entry point,
+so the same bundle runs in desktop and browser extension hosts.
+
+The internal `acsl` language id exists solely for embedded-language token
+classification. It has no filename association and therefore cannot take
+ownership of a C/C++ document.
+
+## Highlighting pipeline
+
+The injection grammar targets `source.c` and `source.cpp` and recognizes:
+
+- block annotations beginning with `/*@` and ending with `*/` or EOF;
+- line annotations beginning with `//@` and ending at CR/LF or EOF.
+
+The selector excludes existing comment and string scopes. Annotation contents
+are assigned `meta.embedded.block.acsl` or `meta.embedded.inline.acsl`; those
+scopes include the small `source.acsl` grammar. Standard TextMate names such as
+`keyword.control`, `storage.type`, and `support.function` let the active theme
+choose colors. No theme is bundled and no colors are hard-coded.
+
+The embedded scopes are classified as token type `other`, not `comment`. This
+allows normal word suggestions inside ACSL without changing the user's global
+`editor.quickSuggestions.comments` setting.
+
+## Context detection
+
+Completion first scans document text from the beginning through the cursor. The
+pure TypeScript scanner tracks these states:
+
+```text
+code
+├── lineComment
+├── blockComment
+├── string
+├── char
+├── rawString
+├── acslLine
+└── acslBlock
+```
+
+Only markers encountered in `code` can enter an ACSL state. Escape sequences,
+line continuations, and C++ raw-string delimiters are handled so marker-like
+text inside literals cannot enable completion. A block annotation that has not
+yet been closed remains valid through the cursor, which is essential during
+editing. Ordinary C/C++ block comments are not nested.
+
+The scanner returns the annotation kind and offsets of the marker, content, and
+cursor. If it returns no context, the provider returns `undefined` immediately.
+Version 0.1 uses an O(n) forward scan; a benchmark guards the target
+of less than 20 ms for a 1 MiB fixture on the supported Node development
+runtime. Line-state caching can be added later without changing the public
+provider contract.
+
+## Completion pipeline
+
+For a valid context, the prefix extractor determines one of three modes:
+
+- ordinary word (`req`);
+- backslash identifier (`\va`), including the slash in the replacement range;
+- multi-word construct (`loop inv`), including the full phrase in the range.
+
+Catalog entries are filtered by prefix/alias and sorted by explicit priority,
+label length, and label. An empty prefix or a lone backslash returns a bounded
+set of high-priority entries and marks the list incomplete. Typed prefixes
+return the complete matching set.
+
+Each label produces exactly one completion item. Entries with a configured
+template use `SnippetString`; a separate duplicate snippet candidate is not
+created. The item builder avoids inserting a second semicolon when one already
+follows the cursor. Declaration templates expose editable names, types,
+parameters, terms, and predicates. Constructs defined as blocks by ACSL, such
+as `axiomatic` and `inductive`, insert newline-delimited braces; a named
+`behavior` instead follows its grammar's colon-and-body form. The provider
+never invents any placeholder value. Because a physical newline terminates a
+`//@` annotation, snippets containing newlines are folded to an equivalent
+single-line form in that context. Their multiline form is retained in block
+annotations.
+
+## Vocabulary and generated artifacts
+
+Files below `data/acsl/<version>/` are the reviewable source of truth. Each entry
+records category, documentation, priority, and specification provenance. The
+catalog loader supplies completion, while `scripts/generate-grammar.mjs`
+generates the corresponding keyword patterns in
+`syntaxes/acsl.tmLanguage.json`.
+
+Generation is deterministic. CI regenerates the grammar and fails if the
+working tree changes, ensuring syntax highlighting and completion cannot drift
+silently. Adding a future ACSL profile means adding a version record and data
+directory; a user-facing version selector should not be exposed until at least
+two validated profiles exist.
+
+## Trust, remote, and web behavior
+
+The extension has no workspace-dependent behavior and is safe in untrusted and
+virtual workspaces. It processes the active document text supplied by VS Code
+but does not enumerate, open, or write other workspace files. It uses only
+browser-compatible VS Code APIs and bundled data. There are no Node built-ins,
+native modules, external processes, telemetry, network requests, or
+platform-dependent code at runtime.
+

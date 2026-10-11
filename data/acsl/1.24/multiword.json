@@ -1,0 +1,157 @@
+{
+  "$schema": "../catalog.schema.json",
+  "version": "1.24",
+  "source": {
+    "title": "ANSI/ISO C Specification Language v1.24",
+    "version": "1.24",
+    "tag": "1.24",
+    "commit": "585d28a206a7f7b06987292153cc02ca16b670ba",
+    "license": "CC-BY-4.0",
+    "url": "https://github.com/acsl-language/acsl/tree/1.24"
+  },
+  "entries": [
+    {
+      "id": "multiword.loop-invariant",
+      "label": "loop invariant",
+      "category": "multiword",
+      "detail": "ACSL 1.24 · loop invariant clause",
+      "documentation": "States a property established initially and preserved by each loop iteration.",
+      "priority": 8,
+      "insertion": "plain",
+      "aliases": ["loop inv"],
+      "spec": { "version": "1.24", "section": "Loop annotations", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/loops.tex" }
+    },
+    {
+      "id": "multiword.loop-assigns",
+      "label": "loop assigns",
+      "category": "multiword",
+      "detail": "ACSL 1.24 · loop frame clause",
+      "documentation": "Bounds the locations that may change while the loop executes.",
+      "priority": 10,
+      "insertion": "plain",
+      "aliases": ["loop ass"],
+      "spec": { "version": "1.24", "section": "Loop annotations", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/loops.tex" }
+    },
+    {
+      "id": "multiword.loop-variant",
+      "label": "loop variant",
+      "category": "multiword",
+      "detail": "ACSL 1.24 · loop termination measure",
+      "documentation": "Supplies a decreasing measure used to establish loop termination.",
+      "priority": 10,
+      "insertion": "plain",
+      "aliases": ["loop var"],
+      "spec": { "version": "1.24", "section": "Loop annotations", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/loops.tex" }
+    },
+    {
+      "id": "multiword.loop-allocates",
+      "label": "loop allocates",
+      "category": "multiword",
+      "detail": "ACSL 1.24 · loop allocation clause",
+      "documentation": "Bounds allocations whose status may change during loop execution.",
+      "priority": 22,
+      "insertion": "plain",
+      "aliases": ["loop alloc"],
+      "spec": { "version": "1.24", "section": "Loop allocation", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/allocation.tex" }
+    },
+    {
+      "id": "multiword.loop-frees",
+      "label": "loop frees",
+      "category": "multiword",
+      "detail": "ACSL 1.24 · loop deallocation clause",
+      "documentation": "Bounds deallocations whose status may change during loop execution.",
+      "priority": 22,
+      "insertion": "plain",
+      "aliases": ["loop free"],
+      "spec": { "version": "1.24", "section": "Loop allocation", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/allocation.tex" }
+    },
+    {
+      "id": "multiword.complete-behaviors",
+      "label": "complete behaviors",
+      "category": "multiword",
+      "detail": "ACSL 1.24 · complete behavior set",
+      "documentation": "Declares that the named behaviors cover all applicable executions.",
+      "priority": 18,
+      "insertion": "plain",
+      "aliases": ["complete beh"],
+      "spec": { "version": "1.24", "section": "Complete and disjoint behaviors", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/fn_behavior.tex" }
+    },
+    {
+      "id": "multiword.disjoint-behaviors",
+      "label": "disjoint behaviors",
+      "category": "multiword",
+      "detail": "ACSL 1.24 · disjoint behavior set",
+      "documentation": "Declares that the named behaviors cannot apply simultaneously.",
+      "priority": 18,
+      "insertion": "plain",
+      "aliases": ["disjoint beh"],
+      "spec": { "version": "1.24", "section": "Complete and disjoint behaviors", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/fn_behavior.tex" }
+    },
+    {
+      "id": "multiword.global-invariant",
+      "label": "global invariant",
+      "category": "multiword",
+      "detail": "ACSL 1.24 · global data invariant",
+      "documentation": "Introduces an invariant over global program state.",
+      "priority": 28,
+      "insertion": "plain",
+      "aliases": ["global inv"],
+      "spec": { "version": "1.24", "section": "Data invariants", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/data_invariants.tex" }
+    },
+    {
+      "id": "multiword.type-invariant",
+      "label": "type invariant",
+      "category": "multiword",
+      "detail": "ACSL 1.24 · type invariant",
+      "documentation": "Introduces an invariant that applies to values of a C type.",
+      "priority": 28,
+      "insertion": "plain",
+      "aliases": ["type inv"],
+      "spec": { "version": "1.24", "section": "Data invariants", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/data_invariants.tex" }
+    },
+    {
+      "id": "multiword.weak-global-invariant",
+      "label": "weak global invariant",
+      "category": "multiword",
+      "detail": "ACSL 1.24 · weak global invariant",
+      "documentation": "Introduces a global invariant with weak invariant semantics.",
+      "priority": 38,
+      "insertion": "plain",
+      "aliases": ["weak global inv"],
+      "spec": { "version": "1.24", "section": "Data invariants", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/data_invariants.tex" }
+    },
+    {
+      "id": "multiword.strong-global-invariant",
+      "label": "strong global invariant",
+      "category": "multiword",
+      "detail": "ACSL 1.24 · strong global invariant",
+      "documentation": "Introduces a global invariant with strong invariant semantics.",
+      "priority": 38,
+      "insertion": "plain",
+      "aliases": ["strong global inv"],
+      "spec": { "version": "1.24", "section": "Data invariants", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/data_invariants.tex" }
+    },
+    {
+      "id": "multiword.weak-type-invariant",
+      "label": "weak type invariant",
+      "category": "multiword",
+      "detail": "ACSL 1.24 · weak type invariant",
+      "documentation": "Introduces a type invariant with weak invariant semantics.",
+      "priority": 38,
+      "insertion": "plain",
+      "aliases": ["weak type inv"],
+      "spec": { "version": "1.24", "section": "Data invariants", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/data_invariants.tex" }
+    },
+    {
+      "id": "multiword.strong-type-invariant",
+      "label": "strong type invariant",
+      "category": "multiword",
+      "detail": "ACSL 1.24 · strong type invariant",
+      "documentation": "Introduces a type invariant with strong invariant semantics.",
+      "priority": 38,
+      "insertion": "plain",
+      "aliases": ["strong type inv"],
+      "spec": { "version": "1.24", "section": "Data invariants", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/data_invariants.tex" }
+    }
+  ]
+}

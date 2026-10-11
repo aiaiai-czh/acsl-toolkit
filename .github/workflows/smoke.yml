@@ -1,0 +1,89 @@
+name: Extended smoke tests
+
+on:
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+    inputs:
+      run_integration:
+        description: Run desktop and browser Extension Host tests
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  architecture:
+    name: Architecture (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux ARM64
+            os: ubuntu-24.04-arm
+          - name: Windows ARM64
+            os: windows-11-arm
+          - name: macOS Intel
+            os: macos-15-intel
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate, test, and package
+        run: npm run package
+
+  integration:
+    name: Integration (VS Code ${{ matrix.vscode_version }})
+    if: github.event_name == 'schedule' || inputs.run_integration
+    strategy:
+      fail-fast: false
+      matrix:
+        vscode_version: ["1.85.0", stable]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build browser bundle and integration tests
+        run: npm run bundle
+
+      - name: Run desktop Extension Host tests
+        env:
+          VSCODE_TEST_VERSION: ${{ matrix.vscode_version }}
+        run: xvfb-run -a npm run test:integration:desktop
+
+      - name: Run browser Extension Host tests
+        if: matrix.vscode_version == 'stable'
+        run: xvfb-run -a npm run test:integration:web
+

@@ -1,0 +1,39 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "bundle",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "type": "npm",
+      "script": "check",
+      "group": "test",
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "type": "npm",
+      "script": "test:unit",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "type": "npm",
+      "script": "test:grammar",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "type": "npm",
+      "script": "package",
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}
+
