@@ -60,7 +60,7 @@ jobs:
           sha256sum "${packages[0]}" > "${packages[0]}.sha256"
 
       - name: Upload verified release artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: acsl-toolkit-${{ github.ref_name }}
           path: |
