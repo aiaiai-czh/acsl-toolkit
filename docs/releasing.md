@@ -5,11 +5,11 @@ publisher account details, local paths, or private test data.
 
 ## External identity setup
 
-The source repository is `aiaiai-czh/acsl-toolkit`. The following external
-values must still be created or confirmed by the repository owner before the
-first public release:
+The source repository is `aiaiai-czh/acsl-toolkit`, and the confirmed Visual
+Studio Marketplace publisher ID is `zehanchen`. The following external values
+must still be created or confirmed by the repository owner before the first
+public release:
 
-- the Visual Studio Marketplace publisher ID;
 - optionally, an Open VSX namespace;
 - a protected GitHub `release` environment;
 - a GitHub environment variable named `VSCODE_PUBLISHER` containing only the

@@ -3,7 +3,7 @@
   "displayName": "ACSL Toolkit",
   "description": "ACSL syntax highlighting, annotation-aware completion, and snippets inside C and C++ documents.",
   "version": "0.1.0",
-  "publisher": "acsl-toolkit",
+  "publisher": "zehanchen",
   "repository": {
     "type": "git",
     "url": "https://github.com/aiaiai-czh/acsl-toolkit.git"
