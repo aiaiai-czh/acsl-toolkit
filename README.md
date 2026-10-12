@@ -6,8 +6,8 @@ A complete Simplified Chinese edition is available in
 ACSL Toolkit adds lightweight editing support for the ANSI/ISO C Specification
 Language (ACSL) inside existing C and C++ documents. It provides syntax
 highlighting, native line-comment support, annotation-aware lexical completion,
-and practical snippets without requiring Frama-C, OCaml, a language server, or
-a native executable.
+declared-name completion, and practical snippets without requiring Frama-C,
+OCaml, a language server, or a native executable.
 
 The extension augments the existing `c` and `cpp` language modes. It does not
 take ownership of C/C++ files or replace a C/C++ language extension.
@@ -41,6 +41,13 @@ int inspect(const int *buffer, int length);
   `predicate`, `logic`, `lemma`, `axiom`, `behavior`, and `inductive`.
 - Inserts argument placeholders for all 48 callable built-in entries in the
   bundled ACSL 1.24 catalog.
+- Completes declared parameters of `predicate` and `logic`
+  definitions, plus local names bound by `\let`, `\forall`, `\exists`, and
+  `\lambda` within their lexical scope, including tuple bindings and typed
+  set comprehensions.
+- Completes user-defined `predicate` and `logic` names declared in the current
+  or a preceding annotation, and inserts
+  editable argument placeholders from their declarations.
 - Uses multiline declaration templates in block annotations and safe single-line
   forms in `//@` annotations.
 - Supports VS Code's normal **Toggle Line Comment** action for clause lines
@@ -98,6 +105,73 @@ ordinary comments:
 const char *text = "/*@ not an annotation */";
 int requires = 1;
 ```
+
+### Complete declared parameters and local names
+
+Names declared in the current annotation are offered alongside ACSL vocabulary
+entries while they are in scope. For example:
+
+```c
+/*@
+  predicate positive(integer value) = value > 0;
+  logic integer doubled(integer value) = value * 2;
+  predicate nonnegative_elements(integer *values, integer length) =
+    \forall integer index; 0 <= index < length ==> values[index] >= 0;
+*/
+```
+
+When writing either definition's body, typing `v` offers its `value` parameter;
+inside the quantified expression, `i` offers `index`. The same completion works
+for local `\let`, `\exists`, and `\lambda` bindings. Local candidates use the
+variable icon and an ACSL detail label. A closer binding shadows an outer name,
+and names disappear after their declaration or expression scope ends.
+
+Inductive `case` bodies also offer their own local bindings. Names written in
+an `inductive` header are not case parameters; introduce case variables with
+quantifiers or `\let` inside each case.
+
+Local completion reads explicit bindings in the current annotation. It does not
+look up C/C++ parameters or infer types or validate expressions.
+Backslash-prefixed suggestions continue to show ACSL constructs rather than
+local variable names. Automatic
+display follows your normal suggestion settings; **Trigger Suggest** also
+offers these names explicitly.
+
+### Reference user-defined logic and predicates
+
+Completed declarations in the current annotation or a preceding annotation can
+be completed when writing another specification in the same document. For
+example:
+
+```c
+/*@
+  predicate positive(integer value) = value > 0;
+  logic integer doubled(integer value) = value * 2;
+*/
+
+/*@
+  requires positive(input);
+  ensures doubled(input) > input;
+*/
+int inspect_positive(int input);
+```
+
+Typing `po` in the contract offers `positive`, with the call template
+`positive(${1:value})`; typing `dou` offers `doubled(${1:value})`. Argument
+names come from the declaration, not from inferred values at the call site.
+Declared logic labels also receive editable placeholders; no concrete label is
+selected automatically.
+Existing parentheses and arguments are left unchanged. Declarations without a
+parameter list insert their name (plus declared label placeholders, if any); explicit empty parameter lists insert
+`name()`.
+
+Overloaded declarations show separate signatures without choosing an overload
+by type. A visible local variable with the same name takes precedence. A
+completed definition header enables recursive references, and completed
+declarations later in the same annotation support mutually recursive calls.
+This also covers predicates defined with `inductive`. Declarations in later annotations and names from other documents or included
+files are not looked up. Commented-out declarations and marker-like text in
+ordinary C/C++ comments or strings are ignored.
 
 ### Comment ACSL clauses
 

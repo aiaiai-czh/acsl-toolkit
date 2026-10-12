@@ -23,6 +23,14 @@ export interface CLexicalScanResult {
   readonly contentStart: number | undefined;
 }
 
+/** A half-open ACSL content range, excluding its opening and closing markers. */
+export interface AcslAnnotationRange {
+  readonly kind: 'block' | 'line';
+  readonly annotationStart: number;
+  readonly contentStart: number;
+  readonly contentEnd: number;
+}
+
 interface RawStringStart {
   readonly end: number;
   readonly terminator: string;
@@ -113,12 +121,48 @@ export function scanCSourceAtOffset(
     );
   }
 
+  return scanCSource(text, cursorOffset);
+}
+
+/**
+ * Enumerates genuine ACSL annotations in one lexical pass. The same scanner
+ * used for cursor detection excludes markers hidden by C/C++ literals and
+ * ordinary comments. An unfinished annotation extends through EOF.
+ */
+export function collectAcslAnnotationRanges(
+  text: string,
+): readonly AcslAnnotationRange[] {
+  const annotations: AcslAnnotationRange[] = [];
+  scanCSource(text, text.length, (annotation) => annotations.push(annotation));
+  return annotations;
+}
+
+function scanCSource(
+  text: string,
+  cursorOffset: number,
+  onAnnotation?: (annotation: AcslAnnotationRange) => void,
+): CLexicalScanResult {
   let state: CLexicalState = 'code';
   let offset = 0;
   let annotationStart: number | undefined;
   let contentStart: number | undefined;
   let rawStringTerminator = '';
   let acslContainer: 'acslBlock' | 'acslLine' | undefined;
+
+  function endAnnotation(contentEnd: number): void {
+    // This helper is called only while an ACSL container is open, so both
+    // offsets are present even when its content is a string or inner comment.
+    onAnnotation?.({
+      kind: acslContainer === 'acslBlock' ? 'block' : 'line',
+      annotationStart: annotationStart as number,
+      contentStart: contentStart as number,
+      contentEnd,
+    });
+    state = 'code';
+    acslContainer = undefined;
+    annotationStart = undefined;
+    contentStart = undefined;
+  }
 
   while (offset < cursorOffset) {
     switch (state) {
@@ -245,10 +289,7 @@ export function scanCSourceAtOffset(
 
       case 'acslLine':
         if (isLineBreak(text[offset])) {
-          state = 'code';
-          acslContainer = undefined;
-          annotationStart = undefined;
-          contentStart = undefined;
+          endAnnotation(offset);
           offset = consumeLineBreak(text, offset);
         } else if (text[offset] === '/' && text[offset + 1] === '/') {
           state = 'acslInnerLineComment';
@@ -266,10 +307,7 @@ export function scanCSourceAtOffset(
 
       case 'acslBlock':
         if (text[offset] === '*' && text[offset + 1] === '/') {
-          state = 'code';
-          acslContainer = undefined;
-          annotationStart = undefined;
-          contentStart = undefined;
+          endAnnotation(offset);
           offset += 2;
         } else if (text[offset] === '/' && text[offset + 1] === '/') {
           state = 'acslInnerLineComment';
@@ -291,19 +329,13 @@ export function scanCSourceAtOffset(
           text[offset] === '*' &&
           text[offset + 1] === '/'
         ) {
-          state = 'code';
-          acslContainer = undefined;
-          annotationStart = undefined;
-          contentStart = undefined;
+          endAnnotation(offset);
           offset += 2;
         } else if (isLineBreak(text[offset])) {
           if (acslContainer === 'acslBlock') {
             state = 'acslBlock';
           } else {
-            state = 'code';
-            acslContainer = undefined;
-            annotationStart = undefined;
-            contentStart = undefined;
+            endAnnotation(offset);
           }
           offset = consumeLineBreak(text, offset);
         } else {
@@ -320,10 +352,7 @@ export function scanCSourceAtOffset(
           text[offset] === '*' &&
           text[offset + 1] === '/'
         ) {
-          state = 'code';
-          acslContainer = undefined;
-          annotationStart = undefined;
-          contentStart = undefined;
+          endAnnotation(offset);
           offset += 2;
         } else if (text[offset] === '\\') {
           const escapedOffset = offset + 1;
@@ -331,10 +360,7 @@ export function scanCSourceAtOffset(
             if (acslContainer === 'acslBlock') {
               state = 'acslBlock';
             } else {
-              state = 'code';
-              acslContainer = undefined;
-              annotationStart = undefined;
-              contentStart = undefined;
+              endAnnotation(escapedOffset);
             }
             offset = consumeLineBreak(text, escapedOffset);
           } else {
@@ -347,10 +373,7 @@ export function scanCSourceAtOffset(
           if (acslContainer === 'acslBlock') {
             state = 'acslBlock';
           } else {
-            state = 'code';
-            acslContainer = undefined;
-            annotationStart = undefined;
-            contentStart = undefined;
+            endAnnotation(offset);
           }
           offset = consumeLineBreak(text, offset);
         } else {
@@ -359,6 +382,10 @@ export function scanCSourceAtOffset(
         break;
       }
     }
+  }
+
+  if (onAnnotation !== undefined && annotationStart !== undefined) {
+    endAnnotation(text.length);
   }
 
   return { state, annotationStart, contentStart };

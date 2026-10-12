@@ -6,6 +6,7 @@ export default defineConfig({
       provider: 'v8',
       include: [
         'src/context/**/*.ts',
+        'src/symbols/**/*.ts',
         'src/completion/completionItems.ts',
         'src/completion/prefix.ts',
       ],

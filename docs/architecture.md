@@ -19,6 +19,8 @@ C/C++ TextDocument (languageId: c or cpp)
     └── Completion provider
         ├── C/C++ lexical context scanner
         ├── ACSL prefix extractor
+        ├── annotation-local binding scanner
+        ├── current-document declaration index
         └── versioned completion catalog
 ```
 
@@ -103,10 +105,76 @@ C/C++ block comments are not nested.
 
 The scanner returns the annotation kind and offsets of the marker, content, and
 cursor. If it returns no context, the provider returns `undefined` immediately.
-Version 0.1 uses an O(n) forward scan; a benchmark guards the target
+Context detection uses an O(n) forward scan; a benchmark guards the target
 of less than 20 ms for a 1 MiB fixture on the supported Node development
 runtime. Line-state caching can be added later without changing the public
 provider contract.
+
+## Local binding completion
+
+The provider supplements the static catalog with explicitly declared names from
+the annotation containing the cursor. A browser-safe lexical scanner identifies
+parameters in `predicate` and `logic` definitions and names bound
+by `\let`, `\forall`, `\exists`, and `\lambda`. It skips comments and
+literals and tracks declaration and expression boundaries so local names do not
+leak into following clauses or out of parenthesized expressions. The innermost
+visible declaration wins when names are shadowed.
+
+`src/symbols/acslTokens.ts` retains document offsets for annotation tokens;
+`src/symbols/localSymbols.ts` walks delimiters and binding headers without an
+AST. Tuple `\let` bindings and typed set comprehensions are recognized as well.
+Comprehension names are visible in both the projection and condition, even when
+their declarations occur after the cursor in the projection. Unicode `∀` and
+`∃` spellings use the same quantifier rules.
+
+An `inductive` header contributes no parameter bindings to its `case` bodies.
+Each case obtains local names from its own quantifiers and `\let` bindings,
+following ACSL's inductive typing environment.
+
+These candidates use `CompletionItemKind.Variable`, plain-name insertion, and
+an explicit identifier replacement range that includes any suffix after a
+mid-word cursor. They preserve following punctuation, including semicolons.
+They share the completion list with matching catalog entries for ordinary word
+prefixes. Local names have a separate single-word replacement range; backslash
+prefixes remain reserved for catalog constructs. Local matches are refreshed
+with an incomplete completion list, so typing updates the collected names.
+
+This scanner is intentionally limited to annotation-local lexical bindings.
+User-defined callable names are supplied separately by the document declaration
+index. Neither component resolves C/C++ parameters or infers types. Incomplete
+declarations are handled conservatively during editing. The context scanner
+remains the gatekeeper, so no ACSL candidates are returned inside comments or
+literals.
+
+## User-defined declaration completion
+
+A document-local lexical index recognizes `predicate` and `logic` declarations
+inside genuine ACSL annotations, including `inductive` predicates. It records names, declaration offsets,
+explicit parameter names and types, and whether the declaration has a parameter
+list. The C/C++ lexical scanner excludes marker-like text in ordinary comments,
+quoted literals, and raw strings; annotation tokenization excludes disabled
+`//` lines and ACSL literals. No workspace traversal or file loading is needed.
+`src/symbols/documentSymbols.ts` uses annotation ranges from the same C/C++
+scanner as context detection. `src/symbols/typedNames.ts` shares typed-name
+extraction with local bindings. The provider caches the index per document and
+version, invalidating it when the text changes. A benchmark covers a fresh
+index plus context and local-binding scans in a 1 MiB buffer.
+
+Completed declarations in the current annotation and preceding annotations are
+offered. A completed header permits recursive references from its own definition
+body; later declarations in the same annotation permit mutually recursive
+references. Declarations in later annotations are excluded. This is lexical
+assistance rather than module, visibility, or type resolution. Included files
+and declarations in other documents are outside the index.
+
+Candidates carry an `ACSL document` detail and their declared signature. Calls
+insert `SnippetString` label and argument placeholders named after the declared
+binders. An explicit empty parameter list inserts `name()`, while a declaration without
+one inserts the name (plus any explicit label placeholders). Existing argument lists, including optional label
+and type arguments, are preserved by name-only insertion. Local bindings win
+same-name collisions. Distinct overload signatures remain separate candidates,
+without inferred overload selection; repeated declarations of the same
+signature do not create duplicate candidates.
 
 ## Completion pipeline
 
@@ -121,10 +189,10 @@ label length, and label. An empty prefix or a lone backslash returns a bounded
 set of high-priority entries and marks the list incomplete. Typed prefixes
 return the complete matching set.
 
-Each label produces exactly one completion item. Entries with a configured
-template use `SnippetString`; a separate duplicate snippet candidate is not
-created. The item builder avoids inserting a second semicolon when one already
-follows the cursor. Callable built-in snippets preserve that semicolon. If an
+Each catalog label produces exactly one completion item. Entries with a
+configured template use `SnippetString`; a separate duplicate snippet candidate
+is not created. The item builder avoids inserting a second semicolon when one
+already follows the cursor. Callable built-in snippets preserve that semicolon. If an
 opening parenthesis—or an optional `{label}` or `<type>` argument followed by
 one—already follows the completed name, they insert only the canonical label so
 the user's existing call remains unchanged.

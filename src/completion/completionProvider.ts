@@ -5,6 +5,16 @@ import {
   type AcslAnnotationKind,
 } from '../context/acslContext';
 import type { AcslCatalogEntry } from '../types/catalog';
+import {
+  collectAcslLocalSymbols,
+  type AcslLocalSymbol,
+} from '../symbols/localSymbols';
+import {
+  acslDocumentCallSnippet,
+  indexAcslDocumentSymbols,
+  visibleAcslDocumentSymbols,
+  type AcslDocumentSymbol,
+} from '../symbols/documentSymbols';
 import { ACSL_CATALOG } from './catalog';
 import {
   getAcslFilterText,
@@ -108,10 +118,98 @@ function createCompletionItem(
   return item;
 }
 
+function createLocalSymbolItem(
+  document: vscode.TextDocument,
+  startOffset: number,
+  endOffset: number,
+  symbol: AcslLocalSymbol,
+): vscode.CompletionItem {
+  const item = new vscode.CompletionItem(
+    symbol.name,
+    vscode.CompletionItemKind.Variable,
+  );
+  const origin = symbol.kind === 'parameter'
+    ? `${symbol.owner} parameter`
+    : `${symbol.kind} variable`;
+  item.detail = `ACSL local · ${origin}${symbol.typeText ? ` · ${symbol.typeText}` : ''}`;
+  const documentation = new vscode.MarkdownString();
+  documentation.appendText(`Locally declared ${origin}: ${symbol.name}.`);
+  item.documentation = documentation;
+  item.insertText = symbol.name;
+  item.filterText = symbol.name;
+  item.sortText = `000:000:${symbol.name}`;
+  item.range = new vscode.Range(
+    document.positionAt(startOffset),
+    document.positionAt(endOffset),
+  );
+  return item;
+}
+
+function createDocumentSymbolItem(
+  document: vscode.TextDocument,
+  text: string,
+  annotationKind: AcslAnnotationKind,
+  startOffset: number,
+  endOffset: number,
+  symbol: AcslDocumentSymbol,
+): vscode.CompletionItem {
+  const item = new vscode.CompletionItem(
+    symbol.name,
+    symbol.hasParameterList ? vscode.CompletionItemKind.Function : vscode.CompletionItemKind.Value,
+  );
+  item.detail = `ACSL document · ${symbol.kind} · ${symbol.signature}`;
+  const documentation = new vscode.MarkdownString();
+  documentation.appendText(`Declared in this document: ${symbol.signature}. Arguments and labels are editable placeholders, not inferred values.`);
+  item.documentation = documentation;
+  // Preserve user-written label/type binders as well as existing arguments.
+  const suffix = annotationKind === 'line'
+    ? document.lineAt(document.positionAt(endOffset).line).text.slice(document.positionAt(endOffset).character)
+    : text.slice(endOffset);
+  const hasExistingSuffix = hasFollowingAcslReferenceSuffix(suffix);
+  const insertion = acslDocumentCallSnippet(symbol);
+  item.insertText = hasExistingSuffix || insertion === symbol.name
+    ? symbol.name : new vscode.SnippetString(insertion);
+  item.filterText = symbol.name;
+  item.sortText = `001:${symbol.name.length.toString().padStart(3, '0')}:${symbol.name}:${symbol.signature}`;
+  item.range = new vscode.Range(document.positionAt(startOffset), document.positionAt(endOffset));
+  return item;
+}
+
+function hasFollowingAcslReferenceSuffix(suffix: string): boolean {
+  const trimmed = suffix.trimStart();
+  if (trimmed.startsWith('(') || trimmed.startsWith('{')) return true;
+  // Balance nested generic arguments, but do not interpret a bare '<' in
+  // an ordinary comparison as an already-written type argument list.
+  if (!trimmed.startsWith('<')) return false;
+  let depth = 0;
+  for (const character of trimmed) {
+    if (character === '<') depth += 1;
+    else if (character === '>' && --depth === 0) return true;
+    else if ([';', '=', '/'].includes(character)) break;
+  }
+  return false;
+}
+
+interface DocumentSymbolCache {
+  readonly version: number;
+  readonly text: string;
+  readonly symbols: readonly AcslDocumentSymbol[];
+}
+
 export class AcslCompletionProvider implements vscode.CompletionItemProvider {
+  private readonly documentSymbols = new WeakMap<vscode.TextDocument, DocumentSymbolCache>();
+
   public constructor(
     private readonly catalog: readonly Readonly<AcslCatalogEntry>[] = ACSL_CATALOG,
   ) {}
+
+  private indexedSymbols(document: vscode.TextDocument, text: string): readonly AcslDocumentSymbol[] {
+    const cached = this.documentSymbols.get(document);
+    if (cached !== undefined && cached.version === document.version && cached.text === text) return cached.symbols;
+    const symbols = indexAcslDocumentSymbols(text);
+    this.documentSymbols.set(document, { version: document.version, text, symbols });
+    return symbols;
+  }
 
   public provideCompletionItems(
     document: vscode.TextDocument,
@@ -136,16 +234,45 @@ export class AcslCompletionProvider implements vscode.CompletionItemProvider {
       this.catalog,
     );
     const selection = selectAcslCompletionEntries(prefix, this.catalog);
-    const items = selection.entries.map((entry) =>
-      createCompletionItem(
-        document,
-        prefix.startOffset,
-        prefix.endOffset,
-        entry,
-        annotation.kind,
-      ),
+    // Local names use their own single-word range: a name that happens to
+    // match "loop" or another multiword prefix must replace only that name.
+    const localPrefix = extractAcslPrefix(
+      text, cursorOffset, annotation.contentStart, [],
+    );
+    const locals = localPrefix.mode === 'backslash'
+      ? []
+      : collectAcslLocalSymbols(text, annotation)
+        .filter(({ name }) => name.startsWith(localPrefix.text))
+        .sort((left, right) =>
+          left.name < right.name ? -1 : left.name > right.name ? 1 : 0,
+        );
+    const localNames = new Set(locals.map(({ name }) => name));
+    const references = localPrefix.mode === 'backslash' ? []
+      : visibleAcslDocumentSymbols(this.indexedSymbols(document, text), annotation)
+        .filter(({ name }) => name.startsWith(localPrefix.text) && !localNames.has(name));
+    const declaredNames = new Set([...localNames, ...references.map(({ name }) => name)]);
+    const items = locals.map((symbol) => createLocalSymbolItem(
+      document, localPrefix.startOffset, localPrefix.endOffset, symbol,
+    ));
+    items.push(...references.map((symbol) => createDocumentSymbolItem(
+      document, text, annotation.kind, localPrefix.startOffset, localPrefix.endOffset, symbol,
+    )));
+    items.push(
+      ...selection.entries
+        .filter(({ label }) => !declaredNames.has(label))
+        .map((entry) => createCompletionItem(
+          document,
+          prefix.startOffset,
+          prefix.endOffset,
+          entry,
+          annotation.kind,
+        )),
     );
 
-    return new vscode.CompletionList(items, selection.isIncomplete);
+    const useShortlist = prefix.text.length === 0 || prefix.text === '\\';
+    return new vscode.CompletionList(
+      useShortlist ? items.slice(0, 25) : items,
+      selection.isIncomplete || locals.length > 0 || references.length > 0,
+    );
   }
 }

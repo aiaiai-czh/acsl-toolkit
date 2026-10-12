@@ -59,6 +59,17 @@ function isAcslCompletion(item: vscode.CompletionItem): boolean {
   return item.detail?.startsWith(ACSL_DETAIL_PREFIX) ?? false;
 }
 
+function isDocumentCompletion(item: vscode.CompletionItem): boolean {
+  return item.detail?.startsWith('ACSL document ·') ?? false;
+}
+
+function snippetBody(item: vscode.CompletionItem): string {
+  if (!(item.insertText instanceof vscode.SnippetString)) {
+    return fail(`${completionLabel(item)} must use SnippetString insertion`);
+  }
+  return item.insertText.value;
+}
+
 function positionAfter(
   document: vscode.TextDocument,
   text: string,
@@ -562,6 +573,662 @@ export function registerCompletionIntegrationSuite(): void {
         document.getText(replacementRange(requires)),
         'requires',
         'Completion range must consume the suffix after the cursor',
+      );
+    });
+
+    test('completes declaration parameters after their first letter', async () => {
+      const cases = [
+        {
+          language: 'c',
+          source: '/*@ predicate positive(integer value) = v > 0; */',
+          prefix: '= v',
+        },
+        {
+          language: 'cpp',
+          source: '/*@ logic integer doubled(integer value) = v * 2; */',
+          prefix: '= v',
+        },
+      ] as const;
+
+      for (const testCase of cases) {
+        const document = await vscode.workspace.openTextDocument({
+          language: testCase.language,
+          content: testCase.source,
+        });
+        await vscode.window.showTextDocument(document, { preview: false });
+
+        const items = await requestCompletions(
+          document,
+          positionAfter(document, testCase.prefix),
+        );
+        const value = itemWithLabel(items.filter(isAcslCompletion), 'value');
+
+        assertEqual(
+          value.kind,
+          vscode.CompletionItemKind.Variable,
+          'A declaration parameter must be a variable completion',
+        );
+        assertEqual(value.insertText, 'value', 'Insert the declared name only');
+        assertEqual(
+          document.getText(replacementRange(value)),
+          'v',
+          'The replacement range must contain the typed parameter prefix',
+        );
+        assertEqual(
+          document.languageId,
+          testCase.language,
+          'Local completion must preserve the host language id',
+        );
+      }
+    });
+
+    test('uses only case-local bindings in inductive definitions', async () => {
+      const cases = [
+        {
+          source:
+            '/*@ inductive positive(integer value) { case base: v > 0; } */',
+          prefix: ': v',
+          expectedValue: false,
+        },
+        {
+          source:
+            '/*@ inductive positive(integer argument) { case base: \\forall integer value; v > 0 ==> positive(value); } */',
+          prefix: '; v',
+          expectedValue: true,
+        },
+        {
+          source:
+            '/*@ inductive positive(integer argument) { case base: \\let value = 1; v > 0 ==> positive(value); } */',
+          prefix: '; v',
+          expectedValue: true,
+        },
+      ] as const;
+
+      for (const testCase of cases) {
+        const document = await vscode.workspace.openTextDocument({
+          language: 'c',
+          content: testCase.source,
+        });
+        await vscode.window.showTextDocument(document, { preview: false });
+
+        const items = await requestCompletions(
+          document,
+          positionAfter(document, testCase.prefix),
+        );
+        assertEqual(
+          items.some(
+            (item) => isAcslCompletion(item) && completionLabel(item) === 'value',
+          ),
+          testCase.expectedValue,
+          'An inductive case must use its own bindings rather than header names',
+        );
+      }
+    });
+
+    test('completes local let, quantifier, and lambda bindings', async () => {
+      const cases = [
+        {
+          source: '//@ assert \\let local_value = 1; loc > 0;',
+          prefix: '; loc',
+          label: 'local_value',
+        },
+        {
+          source: '/*@ assert \\forall integer local_value; loc > 0; */',
+          prefix: '; loc',
+          label: 'local_value',
+        },
+        {
+          source: '/*@ assert \\exists integer local_value; loc > 0; */',
+          prefix: '; loc',
+          label: 'local_value',
+        },
+        {
+          source:
+            '/*@ assert \\sum(0, 10, \\lambda integer element; el) > 0; */',
+          prefix: '; el',
+          label: 'element',
+        },
+      ] as const;
+
+      for (const testCase of cases) {
+        const document = await vscode.workspace.openTextDocument({
+          language: 'c',
+          content: testCase.source,
+        });
+        await vscode.window.showTextDocument(document, { preview: false });
+
+        const items = await requestCompletions(
+          document,
+          positionAfter(document, testCase.prefix),
+        );
+        const item = itemWithLabel(
+          items.filter(isAcslCompletion),
+          testCase.label,
+        );
+        assertEqual(
+          item.kind,
+          vscode.CompletionItemKind.Variable,
+          'A local binding must be a variable completion',
+        );
+      }
+    });
+
+    test('replaces the complete parameter token without consuming a semicolon', async () => {
+      const document = await vscode.workspace.openTextDocument({
+        language: 'c',
+        content: '/*@ logic integer identity(integer value) = value; */',
+      });
+      await vscode.window.showTextDocument(document, { preview: false });
+
+      const items = await requestCompletions(
+        document,
+        positionAfter(document, '= va'),
+      );
+      const value = itemWithLabel(items.filter(isAcslCompletion), 'value');
+
+      assertEqual(
+        document.getText(replacementRange(value)),
+        'value',
+        'Mid-word parameter completion must replace the full identifier',
+      );
+      assertEqual(value.insertText, 'value', 'A variable does not insert a snippet');
+    });
+
+    test('keeps local variables and catalog completions in the same list', async () => {
+      const document = await vscode.workspace.openTextDocument({
+        language: 'c',
+        content: '/*@ predicate p(integer predicate_value) = pred > 0; */',
+      });
+      await vscode.window.showTextDocument(document, { preview: false });
+
+      const items = (await requestCompletions(
+        document,
+        positionAfter(document, '= pred'),
+      )).filter(isAcslCompletion);
+
+      assertHasLabel(items, 'predicate_value');
+      assertHasLabel(items, 'predicate');
+    });
+
+    test('returns one candidate for a shadowed local name', async () => {
+      const document = await vscode.workspace.openTextDocument({
+        language: 'c',
+        content:
+          '/*@ predicate p(integer value) = (\\forall real value; va > 0); */',
+      });
+      await vscode.window.showTextDocument(document, { preview: false });
+
+      const items = await requestCompletions(
+        document,
+        positionAfter(document, '; va'),
+      );
+      const valueItems = items.filter(
+        (item) => isAcslCompletion(item) && completionLabel(item) === 'value',
+      );
+
+      assertEqual(valueItems.length, 1, 'A shadowed name must not be duplicated');
+      assertEqual(
+        valueItems[0]!.kind,
+        vscode.CompletionItemKind.Variable,
+        'The visible local name must remain a variable',
+      );
+    });
+
+    test('does not leak locals out of their declaration or binder scope', async () => {
+      const cases = [
+        {
+          source:
+            '/*@ predicate p(integer local_value) = local_value > 0; assert loc > 0; */',
+          prefix: 'assert loc',
+        },
+        {
+          source:
+            '/*@ assert (\\forall integer local_value; local_value > 0) && loc > 0; */',
+          prefix: '&& loc',
+        },
+        {
+          source:
+            '/*@ assert \\exists integer local_value; local_value > 0; assert loc > 0; */',
+          prefix: 'assert loc',
+        },
+        {
+          source:
+            '/*@ predicate p(integer local_value) = local_value > 0; */\n//@ assert loc > 0;',
+          prefix: 'assert loc',
+        },
+      ] as const;
+
+      for (const testCase of cases) {
+        const document = await vscode.workspace.openTextDocument({
+          language: 'c',
+          content: testCase.source,
+        });
+        await vscode.window.showTextDocument(document, { preview: false });
+
+        const items = await requestCompletions(
+          document,
+          positionAfter(document, testCase.prefix),
+        );
+        assertEqual(
+          items.some(
+            (item) =>
+              isAcslCompletion(item) && completionLabel(item) === 'local_value',
+          ),
+          false,
+          'A completed scope must not expose its local names',
+        );
+      }
+    });
+
+    test('excludes local variables from backslash-prefixed completion', async () => {
+      const document = await vscode.workspace.openTextDocument({
+        language: 'c',
+        content: '/*@ predicate p(integer valid_value) = \\va; */',
+      });
+      await vscode.window.showTextDocument(document, { preview: false });
+
+      const items = (await requestCompletions(
+        document,
+        positionAfter(document, '\\va'),
+        '\\',
+      )).filter(isAcslCompletion);
+
+      assertHasLabel(items, '\\valid');
+      assertEqual(
+        items.some((item) => completionLabel(item) === 'valid_value'),
+        false,
+        'A backslash prefix must not offer a plain local name',
+      );
+    });
+
+    test('excludes parameter completions inside comments and strings', async () => {
+      const cases = [
+        {
+          source: '/*@ predicate p(integer value) =\n  // v\n  value > 0; */',
+          prefix: '// v',
+        },
+        {
+          source: '/*@ predicate p(integer value) = "v"; */',
+          prefix: '"v',
+        },
+      ] as const;
+
+      for (const testCase of cases) {
+        const document = await vscode.workspace.openTextDocument({
+          language: 'c',
+          content: testCase.source,
+        });
+        await vscode.window.showTextDocument(document, { preview: false });
+
+        const items = await requestCompletions(
+          document,
+          positionAfter(document, testCase.prefix),
+        );
+        assertEqual(
+          items.filter(isAcslCompletion).length,
+          0,
+          'Comments and strings must not receive ACSL parameter candidates',
+        );
+      }
+    });
+
+    test('completes user-defined predicate and logic calls across annotations', async () => {
+      const cases = [
+        {
+          language: 'c',
+          source:
+            '/*@ predicate positive(integer value) = value > 0; */\n/*@ requires po; */',
+          prefix: 'requires po',
+          label: 'positive',
+          body: 'positive(${1:value})',
+        },
+        {
+          language: 'cpp',
+          source:
+            '/*@ logic integer doubled(integer value) = value * 2; */\n//@ assert dou > 0;',
+          prefix: 'assert dou',
+          label: 'doubled',
+          body: 'doubled(${1:value})',
+        },
+        {
+          language: 'c',
+          source:
+            '/*@ axiomatic Helpers { predicate between(integer value, integer lower, integer upper); } */\n//@ assert bet;',
+          prefix: 'assert bet',
+          label: 'between',
+          body: 'between(${1:value}, ${2:lower}, ${3:upper})',
+        },
+      ] as const;
+
+      for (const testCase of cases) {
+        const document = await vscode.workspace.openTextDocument({
+          language: testCase.language,
+          content: testCase.source,
+        });
+        await vscode.window.showTextDocument(document, { preview: false });
+
+        const items = (await requestCompletions(
+          document,
+          positionAfter(document, testCase.prefix),
+        )).filter(isDocumentCompletion);
+        const item = itemWithLabel(items, testCase.label);
+
+        assertEqual(
+          item.kind,
+          vscode.CompletionItemKind.Function,
+          'A user-defined callable must use the function completion kind',
+        );
+        assertEqual(
+          snippetBody(item),
+          testCase.body,
+          'Argument placeholders must follow the declaration',
+        );
+        assertEqual(
+          document.getText(replacementRange(item)),
+          testCase.prefix.split(' ').at(-1),
+          'The replacement range must preserve clause text and punctuation',
+        );
+        assertEqual(
+          document.languageId,
+          testCase.language,
+          'Document-name completion must preserve the host language id',
+        );
+      }
+    });
+
+    test('permits recursive and mutually recursive references in one annotation', async () => {
+      const cases = [
+        {
+          source: '/*@ predicate positive(integer value) = po(value - 1); */',
+          prefix: '= po',
+          label: 'positive',
+        },
+        {
+          source:
+            '/*@ predicate first(integer value) = sec(value); predicate second(integer value) = first(value); */',
+          prefix: '= sec',
+          label: 'second',
+        },
+      ] as const;
+
+      for (const testCase of cases) {
+        const document = await vscode.workspace.openTextDocument({
+          language: 'c',
+          content: testCase.source,
+        });
+        await vscode.window.showTextDocument(document, { preview: false });
+        const items = (await requestCompletions(
+          document,
+          positionAfter(document, testCase.prefix),
+        )).filter(isDocumentCompletion);
+
+        assertHasLabel(items, testCase.label);
+      }
+    });
+
+    test('excludes declarations in later annotations and incomplete headers', async () => {
+      const cases = [
+        {
+          source:
+            '//@ assert pos;\n/*@ predicate positive(integer value) = value > 0; */',
+          prefix: 'assert pos',
+        },
+        {
+          source: '/*@ predicate positive(integer value',
+          prefix: 'pos',
+        },
+      ] as const;
+
+      for (const testCase of cases) {
+        const document = await vscode.workspace.openTextDocument({
+          language: 'c',
+          content: testCase.source,
+        });
+        await vscode.window.showTextDocument(document, { preview: false });
+        const items = (await requestCompletions(
+          document,
+          positionAfter(document, testCase.prefix),
+        )).filter(isDocumentCompletion);
+
+        assertEqual(
+          items.some((item) => completionLabel(item) === 'positive'),
+          false,
+          'An incomplete header or later annotation must not expose its name',
+        );
+      }
+    });
+
+    test('shows separate user-defined overload signatures without duplicate prototypes', async () => {
+      const document = await vscode.workspace.openTextDocument({
+        language: 'c',
+        content:
+          '/*@ logic integer identity(integer value); logic real identity(real value); logic integer identity(integer value) = value; */\n//@ assert ide > 0;',
+      });
+      await vscode.window.showTextDocument(document, { preview: false });
+
+      const items = (await requestCompletions(
+        document,
+        positionAfter(document, 'assert ide'),
+      )).filter(
+        (item) => isDocumentCompletion(item) && completionLabel(item) === 'identity',
+      );
+
+      assertEqual(items.length, 2, 'Each distinct overload must appear once');
+      assertEqual(
+        new Set(items.map((item) => item.detail)).size,
+        2,
+        'Overload details must identify separate signatures',
+      );
+      assertEqual(
+        items.some((item) => item.detail?.includes('integer')),
+        true,
+        'The integer overload must expose its declared type',
+      );
+      assertEqual(
+        items.some((item) => item.detail?.includes('real')),
+        true,
+        'The real overload must expose its declared type',
+      );
+      for (const item of items) {
+        assertEqual(
+          snippetBody(item),
+          'identity(${1:value})',
+          'Each overload must retain its declaration-based call template',
+        );
+      }
+    });
+
+    test('gives a same-name local binding precedence over document declarations', async () => {
+      const document = await vscode.workspace.openTextDocument({
+        language: 'c',
+        content:
+          '/*@ logic integer value(integer input) = input; */\n/*@ predicate p(integer value) = va > 0; */',
+      });
+      await vscode.window.showTextDocument(document, { preview: false });
+
+      const items = (await requestCompletions(
+        document,
+        positionAfter(document, '= va'),
+      )).filter((item) => isAcslCompletion(item) && completionLabel(item) === 'value');
+
+      assertEqual(items.length, 1, 'A visible local name must not be duplicated');
+      assertEqual(
+        items[0]!.kind,
+        vscode.CompletionItemKind.Variable,
+        'The local binding must take precedence over a callable with the same name',
+      );
+      assertEqual(items[0]!.insertText, 'value', 'A shadowing variable inserts no call');
+    });
+
+    test('preserves user-defined call arguments, label arguments, and type arguments', async () => {
+      const cases = [
+        {
+          source:
+            '/*@ predicate positive(integer value) = value > 0; */\n//@ assert positive (input);',
+          prefix: 'assert po',
+          label: 'positive',
+        },
+        {
+          source:
+            '/*@ predicate unchanged{L}(integer *pointer) reads *pointer; */\n//@ assert unchanged{Old}(buffer);',
+          prefix: 'assert unc',
+          label: 'unchanged',
+        },
+        {
+          source:
+            '/*@ logic T identity<T>(T value) = value; */\n//@ assert identity<integer>(input) > 0;',
+          prefix: 'assert ide',
+          label: 'identity',
+        },
+      ] as const;
+
+      for (const testCase of cases) {
+        const document = await vscode.workspace.openTextDocument({
+          language: 'c',
+          content: testCase.source,
+        });
+        await vscode.window.showTextDocument(document, { preview: false });
+        const items = (await requestCompletions(
+          document,
+          positionAfter(document, testCase.prefix),
+        )).filter(isDocumentCompletion);
+        const item = itemWithLabel(items, testCase.label);
+
+        assertEqual(
+          document.getText(replacementRange(item)),
+          testCase.label,
+          'Mid-word completion must replace only the complete identifier',
+        );
+        assertEqual(
+          item.insertText,
+          testCase.label,
+          'Existing user-defined call arguments must remain unchanged',
+        );
+      }
+    });
+
+    test('distinguishes declarations without parameters from explicit empty calls', async () => {
+      const cases = [
+        {
+          source: '/*@ logic integer limit = 10; */\n//@ assert lim > 0;',
+          prefix: 'assert lim',
+          label: 'limit',
+          insertion: 'limit',
+          isSnippet: false,
+        },
+        {
+          source: '/*@ predicate ready = \\true; */\n//@ assert rea;',
+          prefix: 'assert rea',
+          label: 'ready',
+          insertion: 'ready',
+          isSnippet: false,
+        },
+        {
+          source: '/*@ logic integer count() = 10; */\n//@ assert cou > 0;',
+          prefix: 'assert cou',
+          label: 'count',
+          insertion: 'count()',
+          isSnippet: true,
+        },
+      ] as const;
+
+      for (const testCase of cases) {
+        const document = await vscode.workspace.openTextDocument({
+          language: 'c',
+          content: testCase.source,
+        });
+        await vscode.window.showTextDocument(document, { preview: false });
+        const items = (await requestCompletions(
+          document,
+          positionAfter(document, testCase.prefix),
+        )).filter(isDocumentCompletion);
+        const item = itemWithLabel(items, testCase.label);
+        const insertion = testCase.isSnippet ? snippetBody(item) : item.insertText;
+
+        assertEqual(
+          insertion,
+          testCase.insertion,
+          'Insertion must match the presence or absence of a declared parameter list',
+        );
+      }
+    });
+
+    test('does not index fake or disabled user-defined declarations', async () => {
+      const source = [
+        '/* predicate bogus_plain(integer value); */',
+        '/* ordinary /*@ predicate bogus_nested(integer value); */',
+        'const char *text = "/*@ predicate bogus_string(integer value); */";',
+        'const char *raw = R"tag(/*@ predicate bogus_raw(integer value); */)tag";',
+        'int bogus_code(int value);',
+        '/*@',
+        '  // predicate bogus_disabled(integer value);',
+        '*/',
+        '//@ assert bog;',
+      ].join('\n');
+      const document = await vscode.workspace.openTextDocument({
+        language: 'cpp',
+        content: source,
+      });
+      await vscode.window.showTextDocument(document, { preview: false });
+
+      const items = (await requestCompletions(
+        document,
+        positionAfter(document, 'assert bog'),
+      )).filter(isDocumentCompletion);
+
+      assertEqual(items.length, 0, 'Only genuine active ACSL declarations are indexed');
+    });
+
+    test('keeps document declarations out of other open documents', async () => {
+      const declarationDocument = await vscode.workspace.openTextDocument({
+        language: 'c',
+        content: '/*@ predicate external_positive(integer value) = value > 0; */',
+      });
+      await vscode.window.showTextDocument(declarationDocument, { preview: false });
+      const referenceDocument = await vscode.workspace.openTextDocument({
+        language: 'c',
+        content: '//@ assert external_po;',
+      });
+      await vscode.window.showTextDocument(referenceDocument, { preview: false });
+
+      const items = (await requestCompletions(
+        referenceDocument,
+        positionAfter(referenceDocument, 'external_po'),
+      )).filter(isDocumentCompletion);
+
+      assertEqual(items.length, 0, 'Other open documents must not supply document declarations');
+    });
+
+    test('refreshes document declarations after editing the document', async () => {
+      const source = '/*@ predicate positive(integer value) = value > 0; */\n//@ assert po;';
+      const document = await vscode.workspace.openTextDocument({
+        language: 'c',
+        content: source,
+      });
+      await vscode.window.showTextDocument(document, { preview: false });
+      const originalItems = (await requestCompletions(
+        document,
+        positionAfter(document, 'assert po'),
+      )).filter(isDocumentCompletion);
+      assertHasLabel(originalItems, 'positive');
+
+      const edit = new vscode.WorkspaceEdit();
+      edit.replace(
+        document.uri,
+        new vscode.Range(document.positionAt(0), document.positionAt(source.length)),
+        '/*@ predicate negative(integer value) = value < 0; */\n//@ assert ne;',
+      );
+      assertEqual(await vscode.workspace.applyEdit(edit), true, 'The test edit must apply');
+      const editedItems = (await requestCompletions(
+        document,
+        positionAfter(document, 'assert ne'),
+      )).filter(isDocumentCompletion);
+
+      assertHasLabel(editedItems, 'negative');
+      assertEqual(
+        editedItems.some((item) => completionLabel(item) === 'positive'),
+        false,
+        'A removed declaration must not survive in the document index',
       );
     });
 

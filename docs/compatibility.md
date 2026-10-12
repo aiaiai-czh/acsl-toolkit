@@ -41,12 +41,50 @@ shared profile; this is not a claim of complete ACSL++ support. The extension
 does not report whether a selected Frama-C release implements a catalog entry.
 
 The profile version identifies the specification used for provenance. It is not
-an exhaustive-coverage claim. The 0.1 preview does not yet provide dedicated
+an exhaustive-coverage claim. The preview does not yet provide dedicated
 catalog entries for module/import constructs, `\as`, or the pattern wildcard
 `_`; see `docs/acsl-data-sources.md` for the maintenance policy.
 
 Future language versions can coexist as versioned catalog directories. No
 version setting is exposed until more than one complete, tested profile exists.
+
+## Local names and scope
+
+Local-name completion recognizes explicit parameters of `predicate` and `logic`
+definitions and bindings introduced by `\let`, `\forall`,
+`\exists`, and `\lambda`, including tuple `\let` bindings and typed set
+comprehensions. Names are limited to the current annotation and
+their lexical declaration or expression scope; an inner same-name binding
+shadows an outer one. They are available in both C and C++ language modes and
+in block or line annotations.
+
+Inductive cases support their own local bindings; parameter names written in
+the `inductive` header do not enter a case's scope.
+
+This support uses lexical scanning rather than semantic analysis. It does not
+resolve C/C++ parameters, inferred types, or symbols in other files. Comments
+and literals remain excluded. Complex or incomplete declaration forms outside
+the recognized binding syntax may not produce local candidates.
+
+## User-defined declarations
+
+Completed `predicate` and `logic` declarations, including `inductive` predicates,
+in the current annotation or a preceding annotation are offered in the active document. A completed header
+also permits recursive references from its own body, and later declarations in
+the same annotation support mutually recursive calls. Declared binder names
+supply editable label and argument placeholders; existing call arguments are
+preserved. Declarations without a parameter list insert their
+name plus any declared label placeholders, while explicit empty parameter lists insert `name()`.
+
+Distinct overload signatures are shown separately, with no type-based
+selection. A currently visible local binding takes precedence over a document
+declaration with the same name. The index excludes disabled declarations and
+fake annotations inside C/C++ comments and literals, and follows document
+edits. It does not load other files, follow `#include`, search other open
+documents, resolve modules, infer types, or validate calls. Declarations in later
+annotations and incomplete declaration headers are not offered. This lexical
+feature does not claim complete semantic visibility analysis for all ACSL
+constructs.
 
 ## Target platforms
 

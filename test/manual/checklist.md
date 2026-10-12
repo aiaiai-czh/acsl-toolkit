@@ -103,6 +103,52 @@ the exact VSIX proposed for release.
 - [ ] Empty-prefix suggestions are bounded and remain responsive.
 - [ ] Multi-cursor insertion has predictable replacement ranges.
 
+## Parameters and local names
+
+- [ ] In a `predicate` or `logic` body with parameter `value`, typing `v`
+      offers an ACSL variable candidate; explicit **Trigger Suggest** does too.
+- [ ] `inductive` header parameter names do not appear in its `case` bodies;
+      variables bound by a case's own quantifiers or `\let` do appear.
+- [ ] `\let`, `\forall`, `\exists`, and `\lambda` names are available only
+      in their respective bodies, including nested binders.
+- [ ] Multiple typed names and pointer parameters retain their declared names.
+- [ ] A closer same-name binding shadows the outer one without duplicate ACSL
+      variable candidates; the outer name is restored after leaving the scope.
+- [ ] Local names disappear after a definition, clause, parenthesized binder
+      expression, or annotation ends.
+- [ ] Local candidates coexist with matching catalog candidates and do not
+      appear for backslash-prefixed requests.
+- [ ] Accepting a local completion mid-word replaces the whole identifier and
+      preserves a following semicolon.
+- [ ] No local candidates appear inside strings or commented-out clause lines.
+- [ ] Repeat parameter and binding checks in C, C++, block annotations, and
+      `//@` annotations.
+
+## User-defined logic and predicates
+
+- [ ] A `predicate` or `logic` declared in an earlier annotation is offered from
+      its first matching letter in later contracts and assertions.
+- [ ] Accepting a callable name inserts declaration-based argument placeholders
+      in the declared order; Tab moves through the placeholders normally.
+- [ ] Declared logic labels receive editable placeholders without guessing
+      which program state should be passed at the call site.
+- [ ] A completed header enables recursive references from its own body; later
+      complete declarations in the same annotation allow mutual recursion.
+- [ ] Declarations in later annotations and incomplete headers are not offered.
+- [ ] Distinct overloads display separate signatures; a repeated declaration
+      and definition of one signature do not create duplicate candidates.
+- [ ] A visible same-name local variable takes precedence over a callable.
+- [ ] Existing call parentheses, arguments, labels, types, and following
+      punctuation are preserved when completing a name, including mid-word.
+- [ ] Declarations without a parameter list insert a plain name; declarations
+      with an explicit empty parameter list insert `name()`.
+- [ ] Names from ordinary code, ordinary comments, strings, raw strings, and
+      disabled `//` declarations are not indexed.
+- [ ] Editing or removing a declaration updates suggestions; other open
+      documents and included files do not contribute ACSL document candidates.
+- [ ] Repeat document-name checks in C, C++, untitled documents, block
+      annotations, and line annotations.
+
 ## Editing boundaries
 
 - [ ] Completion works before the closing delimiter of an annotation and stops

@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-ACSL Toolkit 是一个轻量级的 ANSI/ISO C Specification Language（ACSL）编辑辅助扩展。它在现有 C/C++ 文档中提供语法高亮、原生行注释支持、仅限 annotation 的词法补全和实用模板，不要求安装 Frama-C、OCaml、语言服务器或原生可执行程序。
+ACSL Toolkit 是一个轻量级的 ANSI/ISO C Specification Language（ACSL）编辑辅助扩展。它在现有 C/C++ 文档中提供语法高亮、原生行注释支持、仅限 annotation 的词法补全、已声明名称补全和实用模板，不要求安装 Frama-C、OCaml、语言服务器或原生可执行程序。
 
 扩展只增强已有的 `c` 和 `cpp` language mode，不会接管 C/C++ 文件，也不会替代 C/C++ 语言扩展。
 
@@ -28,6 +28,8 @@ int inspect(const int *buffer, int length);
 - 为 `requires`、`ensures`、`loop invariant` 等 clause 插入可用 Tab 跳转的模板，但不会猜测 predicate 内容。
 - 为 `axiomatic`、`predicate`、`logic`、`lemma`、`axiom`、`behavior` 和 `inductive` 等声明提供结构化模板。
 - 为内置 ACSL 1.24 词汇目录中的全部 48 个可调用条目插入参数占位符。
+- 补全 `predicate`、`logic` 定义中声明的输入参数，以及 `\let`、`\forall`、`\exists`、`\lambda` 引入且仍在当前词法作用域内的局部变量，同时支持元组绑定和集合推导式中的变量。
+- 补全当前 annotation 或此前 annotation 中声明的自定义 `predicate`、`logic` 名称，并根据声明参数提供可编辑的调用占位符。
 - 块 annotation 使用多行声明模板；在 `//@` 中自动使用不会逸出当前行的单行形式。
 - 支持在块 annotation 内使用 VS Code 原生的 **切换行注释** 操作注释规约条款。
 - 不修改文档已有的 `c` 或 `cpp` language ID，使其他 C/C++ 高亮、补全、导航和格式化 provider 可以继续工作。
@@ -75,6 +77,46 @@ Frama-C、OCaml 或 Microsoft C/C++ 扩展。
 const char *text = "/*@ not an annotation */";
 int requires = 1;
 ```
+
+### 补全已声明的参数与局部变量
+
+当前 annotation 中已声明、且在光标位置仍然可见的名称，会和 ACSL 词汇一起出现在候选列表中。例如：
+
+```c
+/*@
+  predicate positive(integer value) = value > 0;
+  logic integer doubled(integer value) = value * 2;
+  predicate nonnegative_elements(integer *values, integer length) =
+    \forall integer index; 0 <= index < length ==> values[index] >= 0;
+*/
+```
+
+编写前两个定义的主体时，输入 `v` 即可得到对应的 `value` 参数候选；在量化表达式内部，输入 `i` 可得到 `index`。`\let`、`\exists`、`\lambda` 绑定的局部变量也支持这种补全。局部候选使用变量图标，并带有 ACSL 说明。内层同名变量会遮蔽外层名称；离开定义或绑定表达式的作用域后，这些局部名称不再显示。
+
+`inductive` 的 `case` 内同样支持自行声明的局部绑定。`inductive` 头部写出的参数名称不进入 `case` 作用域；应在各个 `case` 内通过量词或 `\let` 引入需要使用的变量。
+
+局部变量补全从当前 annotation 中显式声明的绑定提取候选，不查询 C/C++ 参数，也不推导类型或校验表达式。反斜杠前缀仍用于 ACSL 构造，不返回普通局部变量。候选是否自动弹出遵循用户的建议设置，也可以执行 **Trigger Suggest** 主动触发。
+
+### 引用自定义 logic 与 predicate
+
+当前 annotation 或此前 annotation 中声明完整的名称，可以在当前文档的其他规约中补全。例如：
+
+```c
+/*@
+  predicate positive(integer value) = value > 0;
+  logic integer doubled(integer value) = value * 2;
+*/
+
+/*@
+  requires positive(input);
+  ensures doubled(input) > input;
+*/
+int inspect_positive(int input);
+```
+
+在函数契约中输入 `po`，即可得到 `positive`，接受后插入 `positive(${1:value})`；输入 `dou` 则提供 `doubled(${1:value})`。占位符名称来自声明参数，扩展不会猜测调用位置应传入什么值。声明的逻辑标签也会生成可编辑占位符，不会自动选择具体标签。若名称后已经有括号和参数，补全只替换名称，保留现有调用。没有参数列表的声明插入名称，以及声明中存在的标签占位符；显式空参数列表则插入 `name()`。通过 `inductive` 定义的谓词同样支持引用补全。
+
+重载声明分别展示签名，不按类型自动选择重载。当前可见的同名局部变量优先显示。定义头部完整后，也可以在其自身主体内补全该名称；同一 annotation 中稍后完成的声明也会提供候选，方便编写相互递归的定义。扩展不查询后续 annotation、其他文档或 `#include` 文件；被注释的声明，以及普通 C/C++ 注释或字符串中的伪 annotation 均会忽略。
 
 ### 注释 ACSL 规约条款
 

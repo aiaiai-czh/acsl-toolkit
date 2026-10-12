@@ -3,6 +3,22 @@
 All notable changes to ACSL Toolkit are documented in this file. This project
 follows [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-10-12
+
+### Added
+
+- Complete explicitly declared parameters in `predicate` and `logic`
+  definitions from their first matching character, including `reads` clauses.
+- Complete local names bound by `\let` (including tuple bindings), `\forall`,
+  `\exists`, `\lambda`, and set comprehensions within their lexical scope.
+- Respect nested scopes and same-name shadowing, and display local names as
+  variable candidates alongside ACSL vocabulary.
+- Complete user-defined `predicate` and `logic` names declared in the current
+  or preceding annotations, including inductive predicates, cross-annotation
+  references, and mutually recursive declarations.
+- Offer declaration-based argument snippets and separate overload signatures
+  for user-defined calls while preserving existing call arguments.
+
 ## [0.2.0] - 2026-10-12
 
 ### Added
