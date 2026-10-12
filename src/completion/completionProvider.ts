@@ -10,16 +10,14 @@ import {
   getAcslFilterText,
   getAcslInsertText,
   getAcslSortText,
+  hasFollowingAcslCallArguments,
+  isAcslCallableSnippet,
   selectAcslCompletionEntries,
   shouldConsumeFollowingSemicolon,
 } from './completionItems';
 import { extractAcslPrefix } from './prefix';
 
 function completionKind(entry: Readonly<AcslCatalogEntry>): vscode.CompletionItemKind {
-  if (entry.insertion === 'snippet') {
-    return vscode.CompletionItemKind.Snippet;
-  }
-
   switch (entry.category) {
     case 'builtin-function':
     case 'builtin-predicate':
@@ -31,7 +29,9 @@ function completionKind(entry: Readonly<AcslCatalogEntry>): vscode.CompletionIte
     case 'clause':
     case 'keyword':
     case 'multiword':
-      return vscode.CompletionItemKind.Keyword;
+      return entry.insertion === 'snippet'
+        ? vscode.CompletionItemKind.Snippet
+        : vscode.CompletionItemKind.Keyword;
   }
 }
 
@@ -60,6 +60,15 @@ function followingSemicolonEndOffset(
   return match === null ? undefined : offset + match[0].length;
 }
 
+function documentHasFollowingCallArguments(
+  document: vscode.TextDocument,
+  offset: number,
+): boolean {
+  const position = document.positionAt(offset);
+  const lineSuffix = document.lineAt(position.line).text.slice(position.character);
+  return hasFollowingAcslCallArguments(lineSuffix);
+}
+
 function createCompletionItem(
   document: vscode.TextDocument,
   startOffset: number,
@@ -76,10 +85,14 @@ function createCompletionItem(
       : endOffset;
   const replacementEnd = document.positionAt(rangeEndOffset);
   const item = new vscode.CompletionItem(entry.label, completionKind(entry));
+  const followsExistingCall =
+    isAcslCallableSnippet(entry) &&
+    documentHasFollowingCallArguments(document, endOffset);
   const insertionText = getAcslInsertText(
     entry,
     hasFollowingSemicolon,
     annotationKind,
+    followsExistingCall,
   );
 
   item.detail = entry.detail;
@@ -88,7 +101,7 @@ function createCompletionItem(
   item.sortText = getAcslSortText(entry);
   item.range = new vscode.Range(document.positionAt(startOffset), replacementEnd);
   item.insertText =
-    entry.insertion === 'snippet'
+    entry.insertion === 'snippet' && !followsExistingCall
       ? new vscode.SnippetString(insertionText)
       : insertionText;
 

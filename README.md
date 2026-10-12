@@ -39,6 +39,8 @@ int inspect(const int *buffer, int length);
   `loop invariant` without guessing predicate contents.
 - Provides structured snippets for declarations including `axiomatic`,
   `predicate`, `logic`, `lemma`, `axiom`, `behavior`, and `inductive`.
+- Inserts argument placeholders for all 48 callable built-in entries in the
+  bundled ACSL 1.24 catalog.
 - Uses multiline declaration templates in block annotations and safe single-line
   forms in `//@` annotations.
 - Supports VS Code's normal **Toggle Line Comment** action for clause lines
@@ -134,6 +136,26 @@ axiomatic ${1:name} {
   ${2:declarations}
 }
 ```
+
+All 48 callable built-in entries in the bundled ACSL 1.24 catalog include
+argument placeholders. This category includes logic functions as well as
+special callable constructs such as `\old` and `\at`. For example, accepting
+`\max` inserts:
+
+```acsl
+\max(${1:x}, ${2:y})
+```
+
+Other examples include `\at(expression, label)`,
+`\sum(lower, upper, function)`, `\base_addr(pointer)`,
+`\nth(sequence, index)`, `\atan2(y, x)`, and `real_of_float(value)`.
+Variadic functions such as `\union` use a single list placeholder. Optional
+logic labels are not guessed. The two-argument form is the default for `\max`
+and `\min`; ACSL's three-argument bounded higher-order form remains available
+by editing the inserted call. If an argument list already follows the
+completion prefix, the extension completes only the built-in name and leaves
+those arguments intact, including calls with an existing `{label}` or `<type>`
+argument.
 
 The extension supplies editable placeholders only. It never infers predicates,
 types, variables, function contracts, or program semantics.

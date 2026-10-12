@@ -3,6 +3,20 @@
 All notable changes to ACSL Toolkit are documented in this file. This project
 follows [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-10-12
+
+### Added
+
+- Added argument-aware snippets for all 48 entries categorized as callable
+  built-ins in the ACSL 1.24 catalog, including state, set, aggregate, memory,
+  list, mathematical, and floating-point constructs.
+
+### Fixed
+
+- Callable snippets preserve an existing argument list instead of inserting a
+  second pair of parentheses.
+- A semicolon following a callable snippet prefix is no longer consumed.
+
 ## [0.1.1] - 2026-10-11
 
 ### Added

@@ -79,12 +79,31 @@ export function getAcslFilterText(entry: Readonly<AcslCatalogEntry>): string {
   return [entry.label, ...(entry.aliases ?? [])].join(' ');
 }
 
+export function isAcslCallableSnippet(
+  entry: Readonly<AcslCatalogEntry>,
+): boolean {
+  return (
+    (entry.category === 'builtin-function' ||
+      entry.category === 'builtin-predicate') &&
+    entry.insertion === 'snippet' &&
+    entry.snippetBody?.startsWith(`${entry.label}(`) === true
+  );
+}
+
+export function hasFollowingAcslCallArguments(text: string): boolean {
+  return /^[ \t]*(?:(?:\{[^{}\r\n]*\}|<[^<>\r\n]*>)[ \t]*)*\(/u.test(text);
+}
+
 export function getAcslInsertText(
   entry: Readonly<AcslCatalogEntry>,
   hasFollowingSemicolon: boolean,
   annotationKind: AcslAnnotationKind = 'block',
+  hasFollowingCallArguments = false,
 ): string {
-  const sourceText = entry.snippetBody ?? entry.label;
+  const sourceText =
+    hasFollowingCallArguments && isAcslCallableSnippet(entry)
+      ? entry.label
+      : (entry.snippetBody ?? entry.label);
   const text =
     annotationKind === 'line'
       ? sourceText.replace(/[ \t]*\r?\n[ \t]*/g, ' ')
@@ -100,6 +119,7 @@ export function shouldConsumeFollowingSemicolon(
   return (
     hasFollowingSemicolon &&
     entry.insertion === 'snippet' &&
+    !isAcslCallableSnippet(entry) &&
     !text.endsWith(';')
   );
 }

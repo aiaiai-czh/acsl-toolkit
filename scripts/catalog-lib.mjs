@@ -185,6 +185,15 @@ function validateSnippet(snippet, location, entriesById, snippetIds, errors) {
   if (entry !== undefined && !snippet.body.startsWith(entry.label)) {
     errors.push(`${location}: body must start with catalog label ${entry.label}`);
   }
+  if (
+    entry?.category === 'builtin-function' &&
+    !snippet.body.startsWith(`${entry.label}(`)
+  ) {
+    errors.push(`${location}: built-in function snippet must start with ${entry.label}(`);
+  }
+  if (entry?.category === 'builtin-function' && snippet.body.endsWith(';')) {
+    errors.push(`${location}: built-in function snippet must not end with a semicolon`);
+  }
 
   const placeholders = [...snippet.body.matchAll(/\$\{([1-9][0-9]*):[^}]+\}/g)].map(
     (match) => Number(match[1]),
@@ -262,6 +271,11 @@ export function validateCatalogData({ versions, catalogDocuments, snippetDocumen
         errors,
       ),
     );
+    for (const entry of entriesById.values()) {
+      if (entry.category === 'builtin-function' && !snippetIds.has(entry.id)) {
+        errors.push(`${SNIPPET_PATH}: missing built-in function snippet for ${entry.id}`);
+      }
+    }
   }
 
   return {

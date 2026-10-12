@@ -26,6 +26,9 @@ specification. Its reviewable source form is published in the repository under
 Changes made for ACSL Toolkit: vocabulary entries were extracted as individual
 identifiers, grouped for editor completion and syntax highlighting, assigned
 original short descriptions, and serialized in a project-specific JSON format.
+Selected function signatures were reformatted as parameter-shaped editor
+snippets after their arity and overloads were reviewed against the pinned
+specification.
 No claim of endorsement by the ACSL authors, CEA LIST, or Inria is made.
 
 To the extent that the selected vocabulary data and its generated or bundled

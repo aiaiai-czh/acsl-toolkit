@@ -36,12 +36,16 @@ For every catalog update:
    examples, regular expressions, or implementation source.
 4. Write a short original editor-facing description and assign the narrowest
    catalog category.
-5. Exclude ordinary C/C++ tokens already owned by the host language service.
-6. Exclude Frama-C plugin-specific constructs unless a future catalog explicitly
+5. For argument-shaped snippets, audit the exact arity, parameter order,
+   overloads, optional labels, and variadic forms before choosing placeholders.
+   Prefer a conservative common form and document any overload that cannot be
+   represented by the single-candidate model.
+6. Exclude ordinary C/C++ tokens already owned by the host language service.
+7. Exclude Frama-C plugin-specific constructs unless a future catalog explicitly
    names and versions that vendor profile.
-7. Run the schema/semantic validator, regenerate the grammar, and review the
+8. Run the schema/semantic validator, regenerate the grammar, and review the
    diff against the specification sections below.
-8. Update `THIRD_PARTY_NOTICES.md` when the source version, authorship, license,
+9. Update `THIRD_PARTY_NOTICES.md` when the source version, authorship, license,
    or transformation changes.
 
 This process produces a structured derivative vocabulary. Its attribution and
@@ -68,6 +72,21 @@ section, and source URL. `introducedIn` and `removedIn` are populated only when
 release history provides evidence; absence must not be interpreted as “present
 in every ACSL version.”
 
+### Callable snippet audit notes
+
+- `\max` and `\min` use the binary signatures from `builtins.tex` by default;
+  their three-argument bounded forms were cross-checked in `higherorder.tex`.
+- `\union` and `\inter` are variadic, so one `sets` placeholder represents the
+  complete comma-separated argument list.
+- Memory-query labels such as `{Old}` and list type arguments such as `<A>` are
+  optional and are therefore omitted from default snippets. Existing arguments
+  of either form are preserved during completion.
+- ACSL 1.24's defining text spells `real_of_float` and `real_of_double` without
+  a backslash, while two later examples spell `\real_of_double` with one. The
+  catalog follows the defining text and records the unescaped spellings.
+- Catalog support is lexical. In particular, an entry in the specification does
+  not imply that every Frama-C release implements it.
+
 ## Validation requirements
 
 The catalog validator must reject:
@@ -77,6 +96,8 @@ The catalog validator must reject:
 - a backslash category whose label does not begin with `\`;
 - malformed or missing specification provenance;
 - snippets with invalid, missing, or conflicting placeholders;
+- a catalogued built-in function without a callable `label(...)` snippet, or
+  with a callable snippet that appends a semicolon;
 - a snippet attached to a label that would create a second visible candidate.
 
 The generated grammar is checked into source control so reviewers and packaged

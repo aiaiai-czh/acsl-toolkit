@@ -64,6 +64,22 @@ the exact VSIX proposed for release.
 - [ ] `\va` offers `\valid` and `\valid_read` without inserting `\\`.
 - [ ] `\res` offers `\result`.
 - [ ] `\fo` offers `\forall`.
+- [ ] `\ma` offers one `\max` candidate and inserts `\max(x, y)` with two Tab
+      stops; `\mi` behaves equivalently for `\min`.
+- [ ] Representative state, aggregate, memory, list, mathematical, and
+      floating-point functions insert their audited arguments: `\at`, `\sum`,
+      `\base_addr`, `\nth`, `\atan2`, and `\round_float`.
+- [ ] Unary functions such as `\abs` insert one Tab stop in block and line
+      annotations.
+- [ ] Plain-word functions such as `pow` and `real_of_float` insert parameter
+      snippets without requiring a leading backslash.
+- [ ] Variadic `\union` and `\inter` snippets expose one editable set-list
+      placeholder rather than guessing the number of arguments.
+- [ ] A callable built-in completion preserves a following semicolon.
+- [ ] If `\max` is followed by an existing argument list, completion replaces
+      only the name and does not duplicate parentheses or parameters.
+- [ ] Existing optional arguments such as `\base_addr{Old}(p)` and
+      `\Cons<A>(head, tail)` are preserved without inserting a second call.
 - [ ] `\valid` sorts before `\valid_read` for the shared prefix.
 - [ ] `loop inv` replaces the entire partial phrase.
 - [ ] A clause with a snippet appears once, not as duplicate keyword/snippet

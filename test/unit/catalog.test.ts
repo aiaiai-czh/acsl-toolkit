@@ -10,6 +10,59 @@ import {
   getAcslCatalogEntry,
 } from '../../src/completion/catalog';
 
+const BUILTIN_FUNCTION_ARGUMENTS: Readonly<
+  Record<string, readonly string[]>
+> = {
+  'builtin.old': ['expression'],
+  'builtin.at': ['expression', 'label'],
+  'builtin.union': ['sets'],
+  'builtin.inter': ['sets'],
+  'builtin.max': ['x', 'y'],
+  'builtin.min': ['x', 'y'],
+  'builtin.sum': ['lower', 'upper', 'function'],
+  'builtin.product': ['lower', 'upper', 'function'],
+  'builtin.numof': ['lower', 'upper', 'predicate_function'],
+  'builtin.base-addr': ['pointer'],
+  'builtin.block-length': ['pointer'],
+  'builtin.offset': ['pointer'],
+  'builtin.allocation': ['pointer'],
+  'builtin.list-cons': ['element', 'tail'],
+  'builtin.concat': ['front', 'tail'],
+  'builtin.repeat': ['sequence', 'count'],
+  'builtin.length': ['sequence'],
+  'builtin.nth': ['sequence', 'index'],
+  'builtin.abs': ['value'],
+  'builtin.sqrt': ['x'],
+  'builtin.pow-real': ['base', 'exponent'],
+  'builtin.pow-integer': ['base', 'exponent'],
+  'builtin.ceil': ['x'],
+  'builtin.floor': ['x'],
+  'builtin.exp': ['x'],
+  'builtin.log': ['x'],
+  'builtin.log10': ['x'],
+  'builtin.sin': ['x'],
+  'builtin.cos': ['x'],
+  'builtin.tan': ['x'],
+  'builtin.cosh': ['x'],
+  'builtin.sinh': ['x'],
+  'builtin.tanh': ['x'],
+  'builtin.asin': ['x'],
+  'builtin.acos': ['x'],
+  'builtin.atan': ['x'],
+  'builtin.asinh': ['x'],
+  'builtin.acosh': ['x'],
+  'builtin.atanh': ['x'],
+  'builtin.atan2': ['y', 'x'],
+  'builtin.hypot': ['x', 'y'],
+  'builtin.round-float': ['mode', 'value'],
+  'builtin.round-double': ['mode', 'value'],
+  'builtin.sign': ['value'],
+  'builtin.exact': ['lvalue'],
+  'builtin.round-error': ['lvalue'],
+  'builtin.real-of-float': ['value'],
+  'builtin.real-of-double': ['value'],
+};
+
 describe('ACSL 1.24 catalog', () => {
   it('is pinned to the audited official release', () => {
     expect(ACSL_VERSION).toBe('1.24');
@@ -95,6 +148,34 @@ describe('ACSL 1.24 catalog', () => {
         insertion: 'snippet',
         snippetBody,
       });
+    }
+  });
+
+  it('provides an argument-shaped snippet for every callable built-in', () => {
+    const functions = getAcslCatalogByCategory('builtin-function');
+
+    expect(functions).toHaveLength(48);
+    expect(functions.map(({ id }) => id).sort()).toEqual(
+      Object.keys(BUILTIN_FUNCTION_ARGUMENTS).sort(),
+    );
+
+    for (const entry of functions) {
+      const parameters = BUILTIN_FUNCTION_ARGUMENTS[entry.id];
+
+      expect(parameters, entry.id).toBeDefined();
+      if (parameters === undefined) continue;
+
+      const argumentsText = parameters
+        .map((name, index) => `\${${index + 1}:${name}}`)
+        .join(', ');
+      expect(entry.insertion, entry.id).toBe('snippet');
+      expect(entry.snippetBody, entry.id).toBe(
+        `${entry.label}(${argumentsText})`,
+      );
+      expect(entry.snippetBody, entry.id).not.toMatch(/;$/);
+      expect(ACSL_CATALOG.filter(({ label }) => label === entry.label)).toHaveLength(
+        1,
+      );
     }
   });
 

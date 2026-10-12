@@ -2,7 +2,7 @@
   "name": "acsl-toolkit",
   "displayName": "ACSL Toolkit",
   "description": "ACSL syntax highlighting, VS Code line-comment support, context-aware completion, and snippets inside C and C++ documents.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "publisher": "zehanchen",
   "repository": {
     "type": "git",

@@ -27,6 +27,7 @@ int inspect(const int *buffer, int length);
 - 对 `\va`、`loop inv` 等前缀执行完整替换，避免重复反斜杠或只替换部分短语。
 - 为 `requires`、`ensures`、`loop invariant` 等 clause 插入可用 Tab 跳转的模板，但不会猜测 predicate 内容。
 - 为 `axiomatic`、`predicate`、`logic`、`lemma`、`axiom`、`behavior` 和 `inductive` 等声明提供结构化模板。
+- 为内置 ACSL 1.24 词汇目录中的全部 48 个可调用条目插入参数占位符。
 - 块 annotation 使用多行声明模板；在 `//@` 中自动使用不会逸出当前行的单行形式。
 - 支持在块 annotation 内使用 VS Code 原生的 **切换行注释** 操作注释规约条款。
 - 不修改文档已有的 `c` 或 `cpp` language ID，使其他 C/C++ 高亮、补全、导航和格式化 provider 可以继续工作。
@@ -109,6 +110,14 @@ axiomatic ${1:name} {
   ${2:declarations}
 }
 ```
+
+内置 ACSL 1.24 词汇目录中的全部 48 个可调用条目都提供参数占位符；其中既有逻辑函数，也包括 `\old`、`\at` 等特殊可调用构造。例如，接受 `\max` 后会插入：
+
+```acsl
+\max(${1:x}, ${2:y})
+```
+
+其他示例包括 `\at(expression, label)`、`\sum(lower, upper, function)`、`\base_addr(pointer)`、`\nth(sequence, index)`、`\atan2(y, x)` 和 `real_of_float(value)`。对于 `\union` 等可变参数函数，模板使用一个列表占位符；对于可选逻辑标签，扩展不会猜测具体标签。默认模板采用 `\max` 和 `\min` 的常用二参数形式；如需 ACSL 的三参数有界高阶形式，可以继续编辑插入后的调用。如果补全前缀后已经存在参数列表，扩展只补全内置函数名称，不会重复插入括号或覆盖现有参数；已有的 `{label}` 或 `<type>` 参数也会保留。
 
 扩展只提供可编辑占位符，不推断 predicate、类型、变量、函数契约或程序语义。
 

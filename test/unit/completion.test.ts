@@ -6,6 +6,8 @@ import {
   getAcslFilterText,
   getAcslInsertText,
   getAcslSortText,
+  hasFollowingAcslCallArguments,
+  isAcslCallableSnippet,
   selectAcslCompletionEntries,
   shouldConsumeFollowingSemicolon,
 } from '../../src/completion/completionItems';
@@ -68,6 +70,15 @@ describe('selectAcslCompletionEntries', () => {
     expect(matches.indexOf('\\valid')).toBeLessThan(
       matches.indexOf('\\valid_read'),
     );
+  });
+
+  it('matches backslash and plain-word callable built-ins', () => {
+    expect(labels('\\ma', 'backslash')).toEqual(['\\max', '\\match']);
+    expect(labels('\\mi', 'backslash')).toEqual(['\\min']);
+    expect(labels('\\ab', 'backslash')).toEqual(['\\abs']);
+    expect(labels('real_of_fl')).toEqual(['real_of_float']);
+    expect(labels('real_of_do')).toEqual(['real_of_double']);
+    expect(labels('pow')).toEqual(['pow']);
   });
 
   it('offers loop clauses from the loop prefix', () => {
@@ -141,6 +152,23 @@ describe('selectAcslCompletionEntries', () => {
 });
 
 describe('completion item metadata helpers', () => {
+  it('recognizes existing callable suffixes with labels and type arguments', () => {
+    for (const suffix of [
+      '(',
+      '  (',
+      '{Old}(',
+      ' {LoopEntry} (',
+      '<integer>(',
+      ' <A> (',
+    ]) {
+      expect(hasFollowingAcslCallArguments(suffix), suffix).toBe(true);
+    }
+
+    for (const suffix of ['', '{Old}', '<A>', '{Old}\n(', 'value(']) {
+      expect(hasFollowingAcslCallArguments(suffix), suffix).toBe(false);
+    }
+  });
+
   it('produces deterministic fixed-width sort text', () => {
     const requires = getAcslCatalogEntry('clause.requires');
     expect(requires).toBeDefined();
@@ -210,6 +238,57 @@ describe('completion item metadata helpers', () => {
     expect(result).toBeDefined();
 
     expect(getAcslInsertText(result!, true)).toBe('\\result');
+  });
+
+  it('inserts parameter placeholders for every callable built-in', () => {
+    for (const callable of ACSL_CATALOG.filter(
+      ({ category }) => category === 'builtin-function',
+    )) {
+      expect(isAcslCallableSnippet(callable), callable.id).toBe(true);
+      expect(getAcslInsertText(callable, false), callable.id).toBe(
+        callable.snippetBody,
+      );
+    }
+
+    expect(getAcslInsertText(getAcslCatalogEntry('builtin.max')!, false)).toBe(
+      '\\max(${1:x}, ${2:y})',
+    );
+    expect(getAcslInsertText(getAcslCatalogEntry('builtin.at')!, false)).toBe(
+      '\\at(${1:expression}, ${2:label})',
+    );
+    expect(getAcslInsertText(getAcslCatalogEntry('builtin.sum')!, false)).toBe(
+      '\\sum(${1:lower}, ${2:upper}, ${3:function})',
+    );
+    expect(
+      getAcslInsertText(getAcslCatalogEntry('builtin.atan2')!, false),
+    ).toBe('\\atan2(${1:y}, ${2:x})');
+    expect(
+      getAcslInsertText(getAcslCatalogEntry('builtin.pow-integer')!, false),
+    ).toBe('pow(${1:base}, ${2:exponent})');
+    expect(
+      getAcslInsertText(getAcslCatalogEntry('builtin.abs')!, false, 'line'),
+    ).toBe('\\abs(${1:value})');
+  });
+
+  it('keeps existing call parentheses instead of inserting a second pair', () => {
+    for (const callable of ACSL_CATALOG.filter(
+      ({ category }) => category === 'builtin-function',
+    )) {
+      expect(
+        getAcslInsertText(callable, false, 'block', true),
+        callable.id,
+      ).toBe(callable.label);
+    }
+  });
+
+  it('does not consume a following semicolon for callable snippets', () => {
+    for (const callable of ACSL_CATALOG.filter(
+      ({ category }) => category === 'builtin-function',
+    )) {
+      expect(shouldConsumeFollowingSemicolon(callable, true), callable.id).toBe(
+        false,
+      );
+    }
   });
 
   it('consumes a stray following semicolon for non-semicolon snippets', () => {

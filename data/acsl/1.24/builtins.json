@@ -120,15 +120,15 @@
     },
     {
       "id": "builtin.max", "label": "\\max", "category": "builtin-function",
-      "detail": "ACSL 1.24 · maximum", "documentation": "Computes a maximum, including the higher-order bounded form defined by ACSL.",
+      "detail": "ACSL 1.24 · maximum", "documentation": "Returns the greater of two integer or real values; the same spelling also has a bounded higher-order form.",
       "priority": 28, "insertion": "plain",
-      "spec": { "version": "1.24", "section": "Higher-order constructs and built-ins", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/higherorder.tex" }
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
     },
     {
       "id": "builtin.min", "label": "\\min", "category": "builtin-function",
-      "detail": "ACSL 1.24 · minimum", "documentation": "Computes a minimum, including the higher-order bounded form defined by ACSL.",
+      "detail": "ACSL 1.24 · minimum", "documentation": "Returns the lesser of two integer or real values; the same spelling also has a bounded higher-order form.",
       "priority": 28, "insertion": "plain",
-      "spec": { "version": "1.24", "section": "Higher-order constructs and built-ins", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/higherorder.tex" }
+      "spec": { "version": "1.24", "section": "Built-in mathematical functions", "sourceUrl": "https://github.com/acsl-language/acsl/blob/1.24/builtins.tex" }
     },
     {
       "id": "builtin.sum", "label": "\\sum", "category": "builtin-function",

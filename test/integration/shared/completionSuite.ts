@@ -300,6 +300,231 @@ export function registerCompletionIntegrationSuite(): void {
       );
     });
 
+    test('provides a parameter snippet for a mathematical built-in', async () => {
+      const document = await vscode.workspace.openTextDocument({
+        language: 'c',
+        content: '/*@ assert \\ma; */',
+      });
+      await vscode.window.showTextDocument(document, { preview: false });
+
+      const items = await requestCompletions(
+        document,
+        positionAfter(document, '\\ma'),
+      );
+      const maxItems = items.filter(
+        (item) => isAcslCompletion(item) && completionLabel(item) === '\\max',
+      );
+
+      assertEqual(maxItems.length, 1, '\\max must have one ACSL candidate');
+      const max = maxItems[0]!;
+      assertEqual(
+        max.kind,
+        vscode.CompletionItemKind.Function,
+        '\\max must remain a function completion',
+      );
+      if (!(max.insertText instanceof vscode.SnippetString)) {
+        fail('\\max must use SnippetString insertion when no call exists');
+      }
+      assertEqual(
+        max.insertText.value,
+        '\\max(${1:x}, ${2:y})',
+        '\\max must provide two ordered argument placeholders',
+      );
+      assertEqual(
+        document.getText(replacementRange(max)),
+        '\\ma',
+        '\\max replacement must preserve the following semicolon',
+      );
+    });
+
+    test('preserves audited aggregate and variadic argument shapes', async () => {
+      const cases = [
+        {
+          prefix: '\\su',
+          label: '\\sum',
+          body: '\\sum(${1:lower}, ${2:upper}, ${3:function})',
+        },
+        {
+          prefix: '\\un',
+          label: '\\union',
+          body: '\\union(${1:sets})',
+        },
+      ] as const;
+
+      for (const testCase of cases) {
+        const document = await vscode.workspace.openTextDocument({
+          language: 'c',
+          content: `/*@ assert ${testCase.prefix}; */`,
+        });
+        await vscode.window.showTextDocument(document, { preview: false });
+
+        const items = await requestCompletions(
+          document,
+          positionAfter(document, testCase.prefix),
+        );
+        const item = itemWithLabel(
+          items.filter(isAcslCompletion),
+          testCase.label,
+        );
+
+        if (!(item.insertText instanceof vscode.SnippetString)) {
+          fail(`${testCase.label} must use SnippetString insertion`);
+        }
+        assertEqual(
+          item.insertText.value,
+          testCase.body,
+          `${testCase.label} must preserve its audited parameter shape`,
+        );
+      }
+    });
+
+    test('provides a unary built-in snippet in a line annotation', async () => {
+      const document = await vscode.workspace.openTextDocument({
+        language: 'c',
+        content: '//@ assert \\ab > 0;',
+      });
+      await vscode.window.showTextDocument(document, { preview: false });
+
+      const items = await requestCompletions(
+        document,
+        positionAfter(document, '\\ab'),
+      );
+      const abs = itemWithLabel(items.filter(isAcslCompletion), '\\abs');
+
+      if (!(abs.insertText instanceof vscode.SnippetString)) {
+        fail('\\abs must use SnippetString insertion');
+      }
+      assertEqual(
+        abs.insertText.value,
+        '\\abs(${1:value})',
+        '\\abs must provide one argument placeholder',
+      );
+    });
+
+    test('provides a parameter snippet for a plain-word built-in function', async () => {
+      const document = await vscode.workspace.openTextDocument({
+        language: 'c',
+        content: '/*@ assert real_of_fl == 0.0; */',
+      });
+      await vscode.window.showTextDocument(document, { preview: false });
+
+      const items = await requestCompletions(
+        document,
+        positionAfter(document, 'real_of_fl'),
+      );
+      const realOfFloat = itemWithLabel(
+        items.filter(isAcslCompletion),
+        'real_of_float',
+      );
+
+      assertEqual(
+        realOfFloat.kind,
+        vscode.CompletionItemKind.Function,
+        'A plain-word built-in must remain a function completion',
+      );
+      if (!(realOfFloat.insertText instanceof vscode.SnippetString)) {
+        fail('real_of_float must use SnippetString insertion');
+      }
+      assertEqual(
+        realOfFloat.insertText.value,
+        'real_of_float(${1:value})',
+        'real_of_float must provide its value placeholder',
+      );
+    });
+
+    test('does not duplicate existing built-in call parentheses', async () => {
+      const document = await vscode.workspace.openTextDocument({
+        language: 'c',
+        content: '/*@ assert \\max (x, y) > 0; */',
+      });
+      await vscode.window.showTextDocument(document, { preview: false });
+
+      const items = await requestCompletions(
+        document,
+        positionAfter(document, '\\ma'),
+      );
+      const max = itemWithLabel(items.filter(isAcslCompletion), '\\max');
+
+      assertEqual(
+        document.getText(replacementRange(max)),
+        '\\max',
+        'Mid-token completion must replace the complete built-in name',
+      );
+      assertEqual(
+        max.insertText,
+        '\\max',
+        'Existing call arguments must remain untouched',
+      );
+    });
+
+    test('preserves existing label and type arguments before a call', async () => {
+      const cases = [
+        {
+          source: '/*@ assert \\base_addr{Old}(pointer) != \\null; */',
+          prefix: '\\base_a',
+          label: '\\base_addr',
+        },
+        {
+          source: '/*@ assert \\length(\\Cons<A>(head, tail)) > 0; */',
+          prefix: '\\Co',
+          label: '\\Cons',
+        },
+      ] as const;
+
+      for (const testCase of cases) {
+        const document = await vscode.workspace.openTextDocument({
+          language: 'c',
+          content: testCase.source,
+        });
+        await vscode.window.showTextDocument(document, { preview: false });
+
+        const items = await requestCompletions(
+          document,
+          positionAfter(document, testCase.prefix),
+        );
+        const item = itemWithLabel(
+          items.filter(isAcslCompletion),
+          testCase.label,
+        );
+
+        assertEqual(
+          document.getText(replacementRange(item)),
+          testCase.label,
+          'Completion must replace only the complete callable name',
+        );
+        assertEqual(
+          item.insertText,
+          testCase.label,
+          'Existing label or type arguments must remain untouched',
+        );
+      }
+    });
+
+    test('preserves an existing call for a plain-word built-in', async () => {
+      const document = await vscode.workspace.openTextDocument({
+        language: 'c',
+        content: '/*@ assert pow (x, y) > 0; */',
+      });
+      await vscode.window.showTextDocument(document, { preview: false });
+
+      const items = await requestCompletions(
+        document,
+        positionAfter(document, 'po'),
+      );
+      const pow = itemWithLabel(items.filter(isAcslCompletion), 'pow');
+
+      assertEqual(
+        document.getText(replacementRange(pow)),
+        'pow',
+        'Mid-token completion must replace the complete plain-word name',
+      );
+      assertEqual(
+        pow.insertText,
+        'pow',
+        'Existing plain-word call arguments must remain untouched',
+      );
+    });
+
     test('consumes a stray semicolon after a block snippet prefix', async () => {
       const document = await vscode.workspace.openTextDocument({
         language: 'c',

@@ -124,14 +124,21 @@ return the complete matching set.
 Each label produces exactly one completion item. Entries with a configured
 template use `SnippetString`; a separate duplicate snippet candidate is not
 created. The item builder avoids inserting a second semicolon when one already
-follows the cursor. Declaration templates expose editable names, types,
-parameters, terms, and predicates. Constructs defined as blocks by ACSL, such
-as `axiomatic` and `inductive`, insert newline-delimited braces; a named
-`behavior` instead follows its grammar's colon-and-body form. The provider
-never invents any placeholder value. Because a physical newline terminates a
-`//@` annotation, snippets containing newlines are folded to an equivalent
-single-line form in that context. Their multiline form is retained in block
-annotations.
+follows the cursor. Callable built-in snippets preserve that semicolon. If an
+opening parenthesis—or an optional `{label}` or `<type>` argument followed by
+one—already follows the completed name, they insert only the canonical label so
+the user's existing call remains unchanged.
+Every entry categorized as `builtin-function` has a callable snippet whose
+placeholder order follows its audited ACSL 1.24 signature. Variadic arguments
+are represented by one list placeholder, optional labels are omitted, and a
+single conservative overload is used where one label has several signatures.
+Declaration templates expose editable names, types, parameters, terms, and
+predicates. Constructs defined as blocks by ACSL, such as `axiomatic` and
+`inductive`, insert newline-delimited braces; a named `behavior` instead follows
+its grammar's colon-and-body form. The provider never invents any placeholder
+value. Because a physical newline terminates a `//@` annotation, snippets
+containing newlines are folded to an equivalent single-line form in that
+context. Their multiline form is retained in block annotations.
 
 ## Vocabulary and generated artifacts
 
